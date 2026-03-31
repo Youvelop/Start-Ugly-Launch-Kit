@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3: Launch Pack — Start Ugly Launch Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #EDEAE1;
+    --cream-dark: #E2DED4;
+    --cream-darker: #D5D0C5;
+    --ink: #1A1A18;
+    --ink-muted: #4A4A45;
+    --ink-light: #7A7A74;
+    --green: #5C6E2E;
+    --green-light: #8A9E48;
+    --green-bg: #EAF0D8;
+    --green-dot: #6B8030;
+    --red: #b84a2e;
+    --border: rgba(26,26,24,0.15);
+    --border-dark: rgba(26,26,24,0.3);
+  }
+
+  body { background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+
+  .top-bar { background: var(--cream-dark); border-bottom: 1px solid var(--border-dark); text-align: center; padding: 10px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-muted); text-transform: uppercase; }
+
+  .page-wrap { max-width: 760px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream-darker); border: 1px solid var(--border-dark); border-radius: 3px; padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 20px; }
+  .badge-dot { width: 6px; height: 6px; background: var(--green-dot); border-radius: 50%; display: inline-block; }
+
+  .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900; line-height: 0.9; text-transform: uppercase; letter-spacing: -1px; color: var(--ink); margin-bottom: 6px; }
+  .hero-title .green { color: var(--green); }
+  .hero-sub { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); letter-spacing: 0.04em; border-left: 3px solid var(--green); padding-left: 12px; margin-top: 16px; margin-bottom: 12px; }
+  .hero-tagline { font-size: 15px; color: var(--ink-muted); font-style: italic; margin-bottom: 40px; padding-left: 15px; border-left: 3px solid var(--border-dark); }
+
+  hr.divider { border: none; border-top: 1px solid var(--border-dark); margin: 40px 0; }
+
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 800; text-transform: uppercase; line-height: 1; color: var(--ink); margin-bottom: 16px; letter-spacing: -0.5px; }
+
+  p { margin-bottom: 14px; color: var(--ink-muted); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  /* DAY CARDS */
+  .day-card { border: 1px solid var(--border-dark); border-radius: 3px; margin: 28px 0; overflow: hidden; }
+  .day-card-header { background: var(--ink); padding: 14px 22px; display: flex; align-items: center; gap: 14px; }
+  .day-pill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: var(--green); color: white; padding: 4px 10px; border-radius: 2px; white-space: nowrap; }
+  .day-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--cream); letter-spacing: 0.02em; }
+  .day-card-body { background: white; padding: 20px 24px; }
+  .day-card-body p { font-size: 14px; }
+
+  .day-date-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .day-date-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); white-space: nowrap; }
+  input[type="date"] { background: var(--cream); border: 1px solid var(--border-dark); border-radius: 3px; padding: 7px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); outline: none; }
+  input[type="date"]:focus { border-color: var(--green); }
+
+  /* CHECKLIST INSIDE DAY */
+  .requirement-list { list-style: none; margin: 14px 0; }
+  .requirement-list li { font-size: 13px; color: var(--ink-muted); padding: 6px 0 6px 16px; position: relative; border-bottom: 1px solid var(--border); }
+  .requirement-list li:last-child { border-bottom: none; }
+  .requirement-list li::before { content: '→'; position: absolute; left: 0; color: var(--green); font-size: 12px; top: 7px; }
+  .requirement-list li strong { color: var(--ink); }
+
+  /* EXAMPLE COMPARISON */
+  .example-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+  .ec-col { padding: 10px 12px; border-radius: 3px; font-size: 13px; }
+  .ec-col.bad { background: rgba(184,74,46,0.07); border: 1px solid rgba(184,74,46,0.2); color: #8a3520; }
+  .ec-col.good { background: var(--green-bg); border: 1px solid rgba(92,110,46,0.2); color: var(--green); }
+  .ec-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: 500; }
+
+  /* PLATFORM PICKER */
+  .platform-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .platform-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 7px 14px; border-radius: 2px; border: 1px solid var(--border-dark); background: var(--cream); cursor: pointer; color: var(--ink-muted); transition: all 0.12s; }
+  .platform-btn:hover { border-color: var(--green); color: var(--green); }
+  .platform-btn.selected { background: var(--green); border-color: var(--green); color: white; }
+
+  /* 10 PEOPLE LIST */
+  .ten-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+  .ten-list li { display: flex; align-items: center; gap: 8px; }
+  .ten-list li .n { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); min-width: 20px; font-weight: 500; }
+  .ten-list li input { flex: 1; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 8px 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  .ten-list li input::placeholder { color: var(--ink-light); font-style: italic; font-size: 12px; }
+  .ten-list li input:focus { border-color: var(--green); }
+
+  /* DM SCRIPT */
+  .dm-script { background: var(--cream-darker); border: 1px solid var(--border-dark); border-radius: 3px; padding: 14px 16px; margin: 12px 0; font-size: 13px; color: var(--ink-muted); line-height: 1.7; font-style: italic; position: relative; }
+  .copy-btn-sm { position: absolute; top: 10px; right: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border-dark); background: transparent; cursor: pointer; color: var(--ink-light); transition: all 0.12s; }
+  .copy-btn-sm:hover { background: var(--green); color: white; border-color: var(--green); }
+
+  /* LAUNCH POST BUILDER */
+  .post-builder { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 22px 26px; margin: 20px 0; }
+  .post-builder-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .post-builder-label::before { content: ''; display: inline-block; width: 7px; height: 7px; background: var(--green-dot); border-radius: 50%; }
+
+  .post-part { margin-bottom: 18px; }
+  .post-part-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .post-part-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; background: var(--ink); color: var(--cream); padding: 3px 8px; border-radius: 2px; letter-spacing: 0.04em; }
+  .post-part-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; text-transform: uppercase; color: var(--ink); letter-spacing: 0.02em; }
+
+  .post-preview { background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 16px 18px; margin-top: 16px; }
+  .post-preview-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; }
+  .post-preview-text { font-size: 14px; color: var(--ink-muted); line-height: 1.8; white-space: pre-wrap; min-height: 80px; }
+  .post-preview-text .filled { color: var(--ink); }
+  .post-preview-text .blank { color: var(--ink-light); font-style: italic; }
+
+  /* POST TEMPLATES */
+  .template-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 16px 0 0; }
+  .tab-btn { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 12px; border-radius: 2px; border: 1px solid var(--border-dark); background: transparent; cursor: pointer; color: var(--ink-muted); transition: all 0.12s; }
+  .tab-btn:hover { border-color: var(--green); color: var(--green); }
+  .tab-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  .template-panel { display: none; }
+  .template-panel.active { display: block; }
+
+  .post-template-card { background: var(--ink); border-radius: 3px; margin: 10px 0; overflow: hidden; }
+  .ptc-header { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+  .ptc-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--green-light); letter-spacing: 0.06em; }
+  .ptc-body { padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(234,224,196,0.9); line-height: 1.8; white-space: pre-wrap; }
+  .copy-btn { background: var(--green); color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 14px; border-radius: 2px; border: none; cursor: pointer; }
+  .copy-btn:hover { background: var(--green-light); }
+
+  /* SELLING PAGE COPY */
+  .page-copy-block { border: 1px solid var(--border-dark); border-radius: 3px; margin: 20px 0; overflow: hidden; }
+  .pcb-header { background: var(--cream-darker); padding: 12px 18px; border-bottom: 1px solid var(--border-dark); }
+  .pcb-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); }
+  .pcb-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; color: var(--ink); letter-spacing: 0.02em; margin-top: 2px; }
+  .pcb-body { background: white; padding: 16px 18px; }
+  .pcb-body p { font-size: 13px; color: var(--ink-light); font-style: italic; margin-bottom: 10px; }
+  .pcb-example { background: var(--cream); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; font-size: 13px; color: var(--ink-muted); font-style: italic; margin-bottom: 10px; }
+  .pcb-example strong { color: var(--ink-light); font-size: 10px; font-style: normal; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+  input[type="text"].field-input { width: 100%; background: var(--cream); border: 1px solid var(--border-dark); border-radius: 3px; padding: 10px 13px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  input[type="text"].field-input::placeholder { color: var(--ink-light); font-style: italic; }
+  input[type="text"].field-input:focus { border-color: var(--green); }
+
+  textarea { width: 100%; min-height: 90px; background: var(--cream); border: 1px solid var(--border-dark); border-radius: 3px; padding: 11px 13px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); resize: vertical; outline: none; transition: border-color 0.15s; }
+  textarea::placeholder { color: var(--ink-light); font-style: italic; }
+  textarea:focus { border-color: var(--green); }
+
+  .field-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 6px; margin-top: 14px; }
+
+  /* METRICS */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .metric-field label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 5px; }
+  .metric-field input { width: 100%; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 9px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  .metric-field input:focus { border-color: var(--green); }
+
+  /* DM SCRIPT SECTION */
+  .dm-block { border: 1px solid var(--border-dark); border-radius: 3px; margin: 16px 0; overflow: hidden; }
+  .dm-block-header { background: var(--cream-darker); padding: 10px 16px; border-bottom: 1px solid var(--border-dark); display: flex; justify-content: space-between; align-items: center; }
+  .dm-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+  .dm-when { font-size: 13px; color: var(--ink); font-weight: 600; }
+  .dm-body { background: white; padding: 14px 16px; font-size: 13px; color: var(--ink-muted); font-style: italic; line-height: 1.7; position: relative; }
+
+  /* CHECKPOINT */
+  .checkpoint-block { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 24px 28px; margin: 32px 0; }
+  .checkpoint-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--ink); margin-bottom: 16px; letter-spacing: 0.02em; }
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-of-type { border-bottom: none; }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--border-dark); border-radius: 2px; flex-shrink: 0; margin-top: 2px; background: white; cursor: pointer; position: relative; transition: all 0.12s; }
+  .check-box.checked { background: var(--green); border-color: var(--green); }
+  .check-box.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg); }
+  .check-text { font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+  .check-text strong { color: var(--ink); }
+  .warning-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); margin-top: 14px; padding: 12px 14px; background: rgba(184,74,46,0.07); border-left: 3px solid var(--red); border-radius: 0 3px 3px 0; }
+
+  .footer { text-align: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border-dark); }
+  .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; color: var(--ink); }
+  .footer-logo span { color: var(--green); }
+  .footer-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); margin-top: 6px; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">Start Ugly: The Launch Kit &nbsp;—&nbsp; Module 3 of 4 · Launch Pack</div>
+
+<div class="page-wrap">
+
+  <div class="badge"><span class="badge-dot"></span> Module 3</div>
+  <h1 class="hero-title">Launch<br><span class="green">Pack.</span></h1>
+  <div class="hero-sub">Get it live and in front of people in 5 days.</div>
+  <p class="hero-tagline">You have a product. Now you need people to see it, want it, and buy it. Five days. One platform. Real sales.</p>
+
+  <hr class="divider">
+
+  <!-- PART 1: 5-DAY CALENDAR -->
+  <div class="section-label">Part 1 of 3</div>
+  <h2 class="section-title">The 5-Day<br>Launch Calendar</h2>
+
+  <p>Most people treat launching like a single moment. It's not. It's a sequence. Each day has one job. Do the job. Move to the next day. Fill in your dates before you do anything else.</p>
+
+  <!-- DAY 1 -->
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-pill">Day 1</span>
+      <span class="day-title">Set Up Your Selling Page</span>
+    </div>
+    <div class="day-card-body">
+      <div class="day-date-row">
+        <span class="day-date-label">Date</span>
+        <input type="date">
+      </div>
+      <p>Your one job today: get your product live somewhere people can buy it. No content. No posting. Just a live page with a buy button.</p>
+      <p><strong>What your selling page needs and nothing else:</strong></p>
+      <ul class="requirement-list">
+        <li>A <strong>headline that states the result</strong> — not your product name, the result</li>
+        <li><strong>3–5 bullet points</strong> describing what's inside — each starting with a verb</li>
+        <li>A <strong>price</strong> — pick one and commit, you can change it later</li>
+        <li>A <strong>buy button</strong> connected to a real payment method</li>
+      </ul>
+      <p style="margin-top: 12px;">No long story. No guarantee section. No FAQ. Those come in version two.</p>
+
+      <div class="example-compare" style="margin: 14px 0;">
+        <div class="ec-col bad"><span class="ec-label bad">Bad headline</span>"The Launch Kit"</div>
+        <div class="ec-col good"><span class="ec-label good">Good headline</span>"Everything You Need To Launch Your First Digital Product This Week"</div>
+      </div>
+
+      <p><strong>Where to set this up:</strong></p>
+      <div class="platform-row">
+        <button class="platform-btn" onclick="selectPlatform(this)">Gumroad</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Beacons</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Stan Store</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Other</button>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-light); font-style: italic; margin: 6px 0 14px;">Pick one. Do not switch halfway through. Get the page live before you go to bed tonight.</p>
+
+      <span class="field-label">Your selling page URL when live</span>
+      <input type="text" class="field-input" placeholder="https://…">
+
+      <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px;">
+        <div class="check-box" onclick="toggleCheck(this)"></div>
+        <span style="font-size: 13px; color: var(--ink-muted);">Page is live with a real buy button</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-pill">Day 2</span>
+      <span class="day-title">Soft Launch To 10 People</span>
+    </div>
+    <div class="day-card-body">
+      <div class="day-date-row">
+        <span class="day-date-label">Date</span>
+        <input type="date">
+      </div>
+      <p>Before you post publicly you tell 10 real people directly. Not followers. Ten humans who know you and would genuinely care about or benefit from what you built. This is not spam. This is a personal message to 10 specific people.</p>
+      <p><strong>Write the names before you send anything:</strong></p>
+      <ul class="ten-list" id="ten-people"></ul>
+
+      <p style="margin-top: 16px;"><strong>The Soft Launch Message</strong></p>
+      <p style="font-size: 13px; color: var(--ink-light);">Adapt this to sound like you. Do not copy it word for word.</p>
+      <div class="dm-body" style="background: var(--cream-darker); border: 1px solid var(--border-dark); border-radius: 3px; margin: 10px 0; padding: 14px 16px; position: relative;">
+        "Hey [name]. I just finished building something I think you'd actually find useful. It's called [product name] and it helps [one sentence description]. I'm launching it this week at [price] and you're one of the first people I'm telling. Here's the link if you want to take a look: [your URL]. No pressure at all. Would genuinely love to know what you think."
+        <button class="copy-btn-sm" onclick="copyText(this, 'Hey [name]. I just finished building something I think you\'d actually find useful. It\'s called [product name] and it helps [one sentence description]. I\'m launching it this week at [price] and you\'re one of the first people I\'m telling. Here\'s the link if you want to take a look: [your URL]. No pressure at all. Would genuinely love to know what you think.')">Copy</button>
+      </div>
+
+      <span class="field-label">Messages sent today</span>
+      <input type="text" class="field-input" placeholder="e.g. 10 / 10">
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-pill">Day 3</span>
+      <span class="day-title">Write Your Launch Post</span>
+    </div>
+    <div class="day-card-body">
+      <div class="day-date-row">
+        <span class="day-date-label">Date</span>
+        <input type="date">
+      </div>
+      <p>Today you write the post that goes public tomorrow. Not posting it today. Writing it, reading it back, and making sure it sounds like a human wrote it. Five parts. One to three sentences each maximum.</p>
+
+      <div class="post-builder">
+        <div class="post-builder-label">Build Your Launch Post</div>
+
+        <div class="post-part">
+          <div class="post-part-header">
+            <span class="post-part-num">Part 1</span>
+            <span class="post-part-title">The Hook</span>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 8px;">The first line. It is the only thing people see before they decide whether to keep reading. States a surprising fact, calls out a specific person and their problem, or makes a bold statement that creates curiosity.</p>
+          <textarea id="hook" style="min-height: 72px;" placeholder="e.g. You don't need 10,000 followers to make your first sale. You need one product and 10 people." oninput="updatePostPreview()"></textarea>
+        </div>
+
+        <div class="post-part">
+          <div class="post-part-header">
+            <span class="post-part-num">Part 2</span>
+            <span class="post-part-title">The Problem</span>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 8px;">2–3 sentences describing the exact situation your buyer is in right now. If they read this and think "that's exactly me" — you've written it correctly.</p>
+          <textarea id="problem" style="min-height: 72px;" placeholder="Describe their specific frustration in their own language." oninput="updatePostPreview()"></textarea>
+        </div>
+
+        <div class="post-part">
+          <div class="post-part-header">
+            <span class="post-part-num">Part 3</span>
+            <span class="post-part-title">What You Built and Why</span>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 8px;">1–2 sentences. What the product is, what it does, and why you built it. Keep it simple.</p>
+          <textarea id="built" style="min-height: 72px;" placeholder="So I built [product name]. It's a [format] that…" oninput="updatePostPreview()"></textarea>
+        </div>
+
+        <div class="post-part">
+          <div class="post-part-header">
+            <span class="post-part-num">Part 4</span>
+            <span class="post-part-title">What They Get</span>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 8px;">3–5 things. Write them as outcomes not features. "You'll have a live selling page by day one" beats "includes a setup guide" every time.</p>
+          <textarea id="whatget" style="min-height: 90px;" placeholder="- You'll have…&#10;- You'll be able to…&#10;- You'll never have to…" oninput="updatePostPreview()"></textarea>
+        </div>
+
+        <div class="post-part">
+          <div class="post-part-header">
+            <span class="post-part-num">Part 5</span>
+            <span class="post-part-title">The Call To Action</span>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 8px;">One sentence. Tell them exactly what to do. Be direct.</p>
+          <textarea id="cta" style="min-height: 60px;" placeholder="Link in bio. / DM me 'launch'. / Comment below and I'll send it." oninput="updatePostPreview()"></textarea>
+        </div>
+
+        <div class="post-preview">
+          <div class="post-preview-label">Live Preview</div>
+          <div class="post-preview-text" id="post-preview-output">Your post will appear here as you fill in the parts above.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15 TEMPLATES -->
+  <div style="margin: 28px 0;">
+    <div class="section-label" style="margin-bottom: 12px;">The 15 Launch Post Templates</div>
+    <p style="font-size: 14px;">Use these if you get stuck. Adapt every single one to your voice, your product, and your audience. Do not post them word for word.</p>
+
+    <div class="template-tabs">
+      <button class="tab-btn active" onclick="switchTab(this, 'announce')">Announcement</button>
+      <button class="tab-btn" onclick="switchTab(this, 'bts')">Behind The Scenes</button>
+      <button class="tab-btn" onclick="switchTab(this, 'proof')">Social Proof</button>
+      <button class="tab-btn" onclick="switchTab(this, 'objection')">Objection Handling</button>
+    </div>
+
+    <div class="template-panel active" id="panel-announce">
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 1 of 3</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"I spent [timeframe] building this so you don't have to figure it out yourself.
+
+[Product name] is a [format] that helps [specific person] [specific result] in [specific timeframe].
+
+What's inside:
+[Result 1]
+[Result 2]
+[Result 3]
+
+[Price]. No fluff. No filler. Just the thing that actually works.
+
+[Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 2 of 3</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"If you've been sitting on an idea for [timeframe] without doing anything about it, I built this for you.
+
+[Product name] gives you [main deliverable], [second deliverable], and [third deliverable] so you can [result] without [main obstacle].
+
+[Price] and it's yours today.
+
+[Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 3 of 3</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"The reason most people never launch their product is not that they're lazy or don't care enough.
+
+It's that nobody gave them the exact steps, the exact words, and the exact tools to do it.
+
+So I built that.
+
+[Product name]: [one sentence description]
+
+[Price]. Link [location]."</div>
+      </div>
+    </div>
+
+    <div class="template-panel" id="panel-bts">
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 4 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"I've been working on something for the past [timeframe].
+
+It started because I kept seeing the same thing: people with real knowledge and real ideas who couldn't figure out how to turn any of it into something they could sell.
+
+So I built [product name].
+
+Here's what's inside: [brief description]
+
+Dropping it [day]. Wanted you to know first."</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 5 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"Quick look at what I've been building.
+
+[Describe one specific element of the product and why it exists]
+
+This is part of [product name], which launches [day] at [price].
+
+[Call to action to follow or stay tuned]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 6 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"The thing nobody tells you about building a digital product:
+
+The hardest part is not the building. It's knowing exactly what to include and what to leave out.
+
+[Product name] solves that problem. Here's how: [one to two sentences]
+
+[Price]. Live [day]."</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 7 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"I kept this simple on purpose.
+
+No 40-page PDF full of theory. No video course you'll never finish. No framework that sounds good but doesn't tell you what to actually do.
+
+[Product name] is [format]. [One sentence result]. [Price].
+
+[Call to action]"</div>
+      </div>
+    </div>
+
+    <div class="template-panel" id="panel-proof">
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 8 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"Someone just [result they got using your product].
+
+They bought [product name] [timeframe] ago. This is what happened: [brief description of their result].
+
+If you've been thinking about it: [call to action and link]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 9 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"First result from [product name].
+
+[Quote or paraphrase from a buyer]
+
+This is exactly why I built it.
+
+[Price] and [call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 10 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"[Number] people have now [used / bought / downloaded] [product name].
+
+Here's what they're saying: [one to three short reactions or results]
+
+Still available at [price]. [Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 11 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"Not going to oversell this.
+
+[Product name] is [honest one sentence description]. It costs [price]. [Number] people have bought it in the last [timeframe].
+
+If [specific situation that describes your buyer], it will help you. Link [location]."</div>
+      </div>
+    </div>
+
+    <div class="template-panel" id="panel-objection">
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 12 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"'I don't have time to build a product.'
+
+I hear this a lot. Here's the honest answer: [product name] is designed to be built in one week using 20 to 30 minutes a day.
+
+Not a free weekend. Not a two-week sabbatical. Twenty minutes a day.
+
+[Price]. [Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 13 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"'I don't have an audience yet.'
+
+You don't need one to make your first sale. You need 10 people who trust you.
+
+[Product name] shows you exactly how to find those 10 people and convert them without feeling like you're begging.
+
+[Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 14 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"'I don't know if my idea is good enough.'
+
+Nobody does before they launch. That's the honest truth.
+
+[Product name] includes an idea filter that tells you in under 10 minutes whether your idea is worth building. If it's not, it helps you find one that is.
+
+[Price]. [Call to action]"</div>
+      </div>
+      <div class="post-template-card">
+        <div class="ptc-header"><span class="ptc-num">Post 15 of 4</span><button class="copy-btn" onclick="copyPtc(this)">Copy</button></div>
+        <div class="ptc-body">"'I've tried to launch before and it didn't work.'
+
+Most launches fail because of one of three reasons: the offer wasn't clear, the product wasn't built, or it was never actually shown to anyone.
+
+[Product name] solves all three. In order. In five days.
+
+[Call to action]"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-pill">Day 4</span>
+      <span class="day-title">Go Public</span>
+    </div>
+    <div class="day-card-body">
+      <div class="day-date-row">
+        <span class="day-date-label">Date</span>
+        <input type="date">
+      </div>
+      <p>Today you post your launch post publicly. One platform. The one where your people already are. Make one adjustment if Day 2 feedback gave you something obvious to fix. One. Not a full rewrite.</p>
+      <p><strong>After you post, do these three things in this order:</strong></p>
+      <ul class="requirement-list">
+        <li>Reply to every comment within the first two hours</li>
+        <li>Share the post to your stories or repost it with one added line of context</li>
+        <li>Send the link directly to five more people not on your Day 2 list</li>
+      </ul>
+
+      <span class="field-label">Platform you are posting on</span>
+      <div class="platform-row">
+        <button class="platform-btn" onclick="selectPlatform(this)">Threads</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Instagram</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">LinkedIn</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">TikTok</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Twitter / X</button>
+        <button class="platform-btn" onclick="selectPlatform(this)">Other</button>
+      </div>
+
+      <span class="field-label">Time you are posting</span>
+      <input type="text" class="field-input" placeholder="e.g. 9:00 AM">
+
+      <div style="display: flex; align-items: center; gap: 10px; margin-top: 16px;">
+        <div class="check-box" onclick="toggleCheck(this)"></div>
+        <span style="font-size: 13px; color: var(--ink-muted);">Post is live and public</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-card">
+    <div class="day-card-header">
+      <span class="day-pill">Day 5</span>
+      <span class="day-title">Look, Adjust, Note What's Next</span>
+    </div>
+    <div class="day-card-body">
+      <div class="day-date-row">
+        <span class="day-date-label">Date</span>
+        <input type="date">
+      </div>
+      <p>Check what happened. Be honest about what you see. You're not looking for perfection. You're looking for signal. One buyer is signal. One comment asking a specific question is signal. Silence is also signal.</p>
+
+      <div class="metrics-grid">
+        <div class="metric-field">
+          <label>People who saw the post</label>
+          <input type="text" placeholder="—">
+        </div>
+        <div class="metric-field">
+          <label>Clicked the link</label>
+          <input type="text" placeholder="—">
+        </div>
+        <div class="metric-field">
+          <label>Bought</label>
+          <input type="text" placeholder="—">
+        </div>
+        <div class="metric-field">
+          <label>Responded / commented</label>
+          <input type="text" placeholder="—">
+        </div>
+      </div>
+
+      <span class="field-label">What people responded to most</span>
+      <textarea style="min-height: 72px;" placeholder="What got the most engagement, DMs, or clicks?"></textarea>
+
+      <span class="field-label">What question came up that your page or post didn't answer</span>
+      <textarea style="min-height: 72px;" placeholder="What did people ask you that should have been on the page?"></textarea>
+
+      <span class="field-label">One thing to adjust based on what you saw</span>
+      <input type="text" class="field-input" placeholder="Be specific. One thing.">
+
+      <span class="field-label">The next thing to do after this adjustment</span>
+      <input type="text" class="field-input" placeholder="Make the adjustment. Then keep going.">
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 2: SELLING PAGE COPY -->
+  <div class="section-label">Part 2 of 3</div>
+  <h2 class="section-title">Selling Page<br>Copy Template</h2>
+
+  <p>Fill in the six blanks and your selling page is done. Do not add more sections. Do not write an essay. Fill in the blanks and publish.</p>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 1 of 6</div><div class="pcb-title">Your Headline</div></div>
+    <div class="pcb-body">
+      <p>State the result. Not the product name. The result.</p>
+      <p style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); font-style: normal;">Formula: "[Specific result] in [specific timeframe] even if [main objection]"</p>
+      <div class="pcb-example"><strong>Example</strong>"Launch Your First Digital Product This Week Even If You Have No Audience and No Idea Where To Start"</div>
+      <input type="text" class="field-input" placeholder="Your headline…">
+    </div>
+  </div>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 2 of 6</div><div class="pcb-title">What This Is</div></div>
+    <div class="pcb-body">
+      <p>One to two sentences describing exactly what the product is and what format it's in.</p>
+      <div class="pcb-example"><strong>Example</strong>"The Launch Kit is a plug-and-play system that gives you every template, prompt, and step-by-step guide you need to go from idea to first sale in five days."</div>
+      <textarea style="min-height: 72px;" placeholder="Your description…"></textarea>
+    </div>
+  </div>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 3 of 6</div><div class="pcb-title">This Is For You If</div></div>
+    <div class="pcb-body">
+      <p>3–5 specific descriptions of your buyer and their situation. Each one starting with "You".</p>
+      <div class="pcb-example"><strong>Example</strong>You have an idea you've been sitting on for months and haven't done anything with it.<br>You've tried to start before but got stuck on what to build or how to sell it.<br>You want to make money online but don't want to spend six months learning first.</div>
+      <textarea style="min-height: 100px;" placeholder="You…&#10;You…&#10;You…"></textarea>
+    </div>
+  </div>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 4 of 6</div><div class="pcb-title">What You Get</div></div>
+    <div class="pcb-body">
+      <p>List every item inside the product as an outcome not a feature.</p>
+      <div class="pcb-example"><strong>Example</strong>The Idea Filter so you know exactly which idea to build first.<br>The MVV Builder so you build only what your product actually needs.<br>15 launch post templates so you never stare at a blank screen.</div>
+      <textarea style="min-height: 120px;" placeholder="[Item] so you can [outcome]…"></textarea>
+    </div>
+  </div>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 5 of 6</div><div class="pcb-title">Price and Access</div></div>
+    <div class="pcb-body">
+      <p>Your price and what happens after they buy.</p>
+      <div class="pcb-example"><strong>Example</strong>"$47. You get instant access to everything. No waiting. No upsell required to get the full product."</div>
+      <input type="text" class="field-input" placeholder="$__ . You get…">
+    </div>
+  </div>
+
+  <div class="page-copy-block">
+    <div class="pcb-header"><div class="pcb-num">Blank 6 of 6</div><div class="pcb-title">Closing Line</div></div>
+    <div class="pcb-body">
+      <p>One final line that removes hesitation.</p>
+      <div class="pcb-example"><strong>Example</strong>"Everything you need to launch is already inside. The only thing left is to start."</div>
+      <input type="text" class="field-input" placeholder="Your closing line…">
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 3: DM SCRIPT -->
+  <div class="section-label">Part 3 of 3</div>
+  <h2 class="section-title">The Soft Launch<br>DM Script</h2>
+
+  <p>Use this word for word or adapt it to your voice. Works for Instagram, Threads, WhatsApp, or any direct message platform.</p>
+
+  <div class="dm-block">
+    <div class="dm-block-header">
+      <span class="dm-num">Message 1 of 4</span>
+      <span class="dm-when">The first contact</span>
+    </div>
+    <div class="dm-body">
+      "Hey [name]. Quick one. I just finished building [product name] and you're one of the first people I'm telling about it. It's a [format] that helps [specific person] [specific result]. Thought of you because [one specific reason relevant to them]. Here's the link if you want a look: [URL]"
+      <button class="copy-btn-sm" onclick="copyText(this, 'Hey [name]. Quick one. I just finished building [product name] and you\'re one of the first people I\'m telling about it. It\'s a [format] that helps [specific person] [specific result]. Thought of you because [one specific reason relevant to them]. Here\'s the link if you want a look: [URL]')">Copy</button>
+    </div>
+  </div>
+
+  <div class="dm-block">
+    <div class="dm-block-header">
+      <span class="dm-num">Message 2 of 4</span>
+      <span class="dm-when">If they open but don't reply within 48 hours</span>
+    </div>
+    <div class="dm-body">
+      "Hey [name]. Just checking you got my last message okay. No pressure at all. Genuinely just wanted to make sure it landed. Happy to answer any questions if you have them."
+      <button class="copy-btn-sm" onclick="copyText(this, 'Hey [name]. Just checking you got my last message okay. No pressure at all. Genuinely just wanted to make sure it landed. Happy to answer any questions if you have them.')">Copy</button>
+    </div>
+  </div>
+
+  <div class="dm-block">
+    <div class="dm-block-header">
+      <span class="dm-num">Message 3 of 4</span>
+      <span class="dm-when">If they ask what it is</span>
+    </div>
+    <div class="dm-body">
+      "It's a [format] that walks you through [main process or outcome] step by step. Includes [most valuable element], [second most valuable element], and [third most valuable element]. The whole thing is designed to get you [result] in [timeframe] without [main obstacle]. It's [price] and you get everything instantly. Want me to send you the link?"
+      <button class="copy-btn-sm" onclick="copyText(this, 'It\'s a [format] that walks you through [main process or outcome] step by step. Includes [most valuable element], [second most valuable element], and [third most valuable element]. The whole thing is designed to get you [result] in [timeframe] without [main obstacle]. It\'s [price] and you get everything instantly. Want me to send you the link?')">Copy</button>
+    </div>
+  </div>
+
+  <div class="dm-block">
+    <div class="dm-block-header">
+      <span class="dm-num">Message 4 of 4</span>
+      <span class="dm-when">If they're interested but haven't bought</span>
+    </div>
+    <div class="dm-body">
+      "Totally get it. If it helps, the price goes up after [date or number of buyers]. But genuinely no pressure. If it's useful to you it'll still be here. Just let me know if you have any questions."
+      <button class="copy-btn-sm" onclick="copyText(this, 'Totally get it. If it helps, the price goes up after [date or number of buyers]. But genuinely no pressure. If it\'s useful to you it\'ll still be here. Just let me know if you have any questions.')">Copy</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CHECKPOINT -->
+  <div class="section-label">Before You Move to Module 4</div>
+  <h2 class="section-title">Module 3<br>Checkpoint</h2>
+
+  <p>Reading Module 4 will not make your product sell. Having it live and in front of people will.</p>
+
+  <div class="checkpoint-block">
+    <div class="checkpoint-title">Three Things Done</div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Your selling page is live</strong> with a real buy button and a real price.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Your launch post is written</strong> and scheduled or already posted publicly.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Personal messages sent</strong> to at least 10 people.</div>
+    </div>
+    <div class="warning-text">If any of these are not done, stop here and do them. Reading Module 4 will not make your product sell. Having it live and in front of people will.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Start <span>Ugly</span></div>
+    <div class="footer-sub">The Launch Kit · Module 3 · © 2026 Youvelop · Elias Crespo Molato</div>
+  </div>
+
+</div>
+
+<script>
+function selectPlatform(btn) {
+  const row = btn.parentElement;
+  row.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function build10People() {
+  const ul = document.getElementById('ten-people');
+  for (let i = 1; i <= 10; i++) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="n">${i}.</span><input type="text" placeholder="Name…">`;
+    ul.appendChild(li);
+  }
+}
+
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+function updatePostPreview() {
+  const hook = document.getElementById('hook').value.trim();
+  const problem = document.getElementById('problem').value.trim();
+  const built = document.getElementById('built').value.trim();
+  const whatget = document.getElementById('whatget').value.trim();
+  const cta = document.getElementById('cta').value.trim();
+  const out = document.getElementById('post-preview-output');
+  const parts = [hook, problem, built, whatget, cta].filter(Boolean);
+  if (parts.length === 0) {
+    out.textContent = 'Your post will appear here as you fill in the parts above.';
+  } else {
+    out.textContent = parts.join('\n\n');
+  }
+}
+
+function switchTab(btn, panel) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.template-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + panel).classList.add('active');
+}
+
+function copyPtc(btn) {
+  const body = btn.closest('.post-template-card').querySelector('.ptc-body');
+  navigator.clipboard.writeText(body.textContent.trim()).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+build10People();
+</script>
+
+</body>
+</html>

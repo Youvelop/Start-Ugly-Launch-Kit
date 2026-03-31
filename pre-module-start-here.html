@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Module: Start Here — Start Ugly Launch Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #EDEAE1;
+    --cream-dark: #E2DED4;
+    --cream-darker: #D5D0C5;
+    --ink: #1A1A18;
+    --ink-muted: #4A4A45;
+    --ink-light: #7A7A74;
+    --green: #5C6E2E;
+    --green-light: #8A9E48;
+    --green-bg: #EAF0D8;
+    --green-dot: #6B8030;
+    --border: rgba(26,26,24,0.15);
+    --border-dark: rgba(26,26,24,0.3);
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border-dark);
+    text-align: center;
+    padding: 10px 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .page-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream-darker);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--green-dot);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* HERO */
+  .hero-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .hero-title .green { color: var(--green); }
+
+  .hero-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+    border-left: 3px solid var(--green);
+    padding-left: 12px;
+    margin-top: 16px;
+    margin-bottom: 48px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border-dark);
+    margin: 40px 0;
+  }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+
+  p { margin-bottom: 14px; color: var(--ink-muted); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  /* ACTION BLOCK */
+  .action-block {
+    background: var(--cream-dark);
+    border: 1px solid var(--border-dark);
+    border-left: 4px solid var(--green);
+    border-radius: 3px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .action-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .action-dot {
+    width: 7px; height: 7px;
+    background: var(--green-dot);
+    border-radius: 50%;
+  }
+  .action-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .action-block h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  /* STEPS */
+  .steps-list { list-style: none; margin: 16px 0 20px; }
+  .steps-list li {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--cream);
+    background: var(--green);
+    min-width: 22px;
+    height: 22px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .step-text { color: var(--ink-muted); font-size: 14px; line-height: 1.6; }
+  .step-text strong { color: var(--ink); }
+
+  /* COPY BLOCK */
+  .copy-block {
+    background: var(--cream);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    font-style: italic;
+    margin: 10px 0 16px;
+    position: relative;
+  }
+
+  /* RIGHTS BOX */
+  .rights-box {
+    background: var(--green-bg);
+    border: 1px solid rgba(92,110,46,0.3);
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .rights-box .rights-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .rights-list { list-style: none; }
+  .rights-list li {
+    font-size: 13px;
+    color: var(--ink-muted);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .rights-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .rights-list li.no::before { background: #b84a2e; }
+  .rights-list li.no { color: #8a3520; }
+
+  /* EXERCISE */
+  .exercise-wrap {
+    margin: 32px 0;
+  }
+  .exercise-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .exercise-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--cream-darker);
+    border: 1px solid var(--border-dark);
+    padding: 4px 10px;
+    border-radius: 2px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+  .exercise-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .question-group { margin: 16px 0; }
+  .question-group-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .q-list { list-style: none; margin-bottom: 4px; }
+  .q-list li {
+    font-size: 14px;
+    color: var(--ink-muted);
+    padding: 5px 0 5px 14px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .q-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 13px;
+    width: 5px; height: 5px;
+    background: var(--ink-muted);
+    border-radius: 50%;
+  }
+
+  /* ANSWER AREA */
+  .answer-area {
+    margin: 16px 0 24px;
+  }
+  .answer-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+    display: block;
+  }
+  textarea {
+    width: 100%;
+    min-height: 100px;
+    background: white;
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea::placeholder { color: var(--ink-light); font-style: italic; }
+  textarea:focus { border-color: var(--green); }
+
+  /* EXAMPLE BOX */
+  .example-box {
+    background: var(--cream-darker);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin: 12px 0 20px;
+    font-size: 13px;
+  }
+  .example-box-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .example-box p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+  .example-box p:last-child { margin-bottom: 0; }
+
+  /* AI PROMPT BLOCK */
+  .prompt-block {
+    background: var(--ink);
+    border-radius: 4px;
+    padding: 24px 28px;
+    margin: 28px 0;
+    position: relative;
+  }
+  .prompt-block-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    margin-bottom: 12px;
+  }
+  .prompt-block p {
+    color: rgba(234,224,196,0.8);
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .prompt-text {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: rgba(234,224,196,0.9);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+  .copy-btn {
+    margin-top: 12px;
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 2px;
+    border: none;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--green-light); }
+
+  /* CHECKPOINT */
+  .checkpoint-block {
+    background: var(--cream-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 24px 28px;
+    margin: 32px 0;
+  }
+  .checkpoint-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-item:last-of-type { border-bottom: none; }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border-dark);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .check-box.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .check-box.checked::after {
+    content: '';
+    position: absolute;
+    left: 4px; top: 1px;
+    width: 6px; height: 10px;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+  .check-text { font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+  .check-text strong { color: var(--ink); }
+
+  .warning-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(184,74,46,0.07);
+    border-left: 3px solid #b84a2e;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-dark);
+  }
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .footer-logo span { color: var(--green); }
+  .footer-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">Start Ugly: The Launch Kit &nbsp;—&nbsp; Duplicate this page and work directly in it. Your notes stay with you.</div>
+
+<div class="page-wrap">
+
+  <div class="badge"><span class="badge-dot"></span> Pre-Module</div>
+
+  <h1 class="hero-title">Start<br><span class="green">Here.</span></h1>
+  <div class="hero-sub">The Launch Kit · Elias Crespo Molato · Youvelop</div>
+
+  <hr class="divider">
+
+  <!-- SECTION 1 -->
+  <div class="section-label">Section 1</div>
+  <h2 class="section-title">You Already Have<br>A Product To Sell Today</h2>
+
+  <p>Before you build anything, before you do a single exercise in this kit, you need to know something.</p>
+  <p>You already have a product ready to sell. It came with The Start Ugly Launch Kit. Included is a copy of <strong>Start Ugly by Elias Crespo Molato</strong> and the accompanying Notion template. Both come with <strong>Private Label Resell Rights</strong> — you can list them on Gumroad, Stan Store, or any platform and keep 100% of every sale.</p>
+  <p>No building required. No waiting until you finish the kit. You could have a live selling page in the next 20 minutes.</p>
+
+  <div class="action-block">
+    <div class="action-block-header">
+      <span class="action-dot"></span>
+      <span class="action-label">Do This Now — If You Want Your First Sale Today</span>
+    </div>
+    <ul class="steps-list">
+      <li>
+        <span class="step-num">1</span>
+        <span class="step-text">Go to <strong>Gumroad.com</strong> and create a free account if you don't have one.</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span class="step-text">Create a new product. Upload the Start Ugly PDF and paste in the Notion template link.</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span class="step-text">Use this as your product title: <strong>"Start Ugly: The 5-Day Plan To Launch Before You're Ready"</strong></span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span class="step-text">Use this description:</span>
+      </li>
+    </ul>
+    <div class="copy-block">"This is a no-BS guide for anyone who has been sitting on an idea and hasn't done anything about it yet. Start Ugly walks you through exactly why you haven't started, how to pick the right idea, how to build the minimum version of it, and how to get it in front of real people in 5 days. Comes with a Notion template to work through it step by step. There is no theory, or motivation speech. Just the actual plan."</div>
+    <ul class="steps-list">
+      <li>
+        <span class="step-num">5</span>
+        <span class="step-text">Set your price anywhere between <strong>$17 and $37</strong>. Hit publish. Low prices = fast sales + email list growth you can sell higher-priced products to later.</span>
+      </li>
+      <li>
+        <span class="step-num">6</span>
+        <span class="step-text">Share the link somewhere today. One post, one DM, one story. Somewhere real people will see it.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="rights-box">
+    <div class="rights-title">The Resell Rights — Read Once</div>
+    <ul class="rights-list">
+      <li>You may sell this product at any price and keep all the money.</li>
+      <li>You may not remove the author's name or claim you wrote it.</li>
+      <li class="no">You may not modify the content.</li>
+      <li class="no">You may not give it away for free.</li>
+      <li>Elias Crespo Molato remains the credited author on all copies sold.</li>
+    </ul>
+  </div>
+
+  <p>That's it. You now have a product live and potentially making money while you work through the rest of this kit and build your own thing.</p>
+  <p><strong>If you want to build your own product, keep reading. If you already have an idea, skip straight to Module 1. If you have no idea yet, Section 2 is for you. ↓</strong></p>
+
+  <hr class="divider">
+
+  <!-- SECTION 2 -->
+  <div class="section-label">Section 2</div>
+  <h2 class="section-title">Find Your<br>Own Idea</h2>
+
+  <p>Most people think they have nothing to offer. They're wrong. The problem is not that they have nothing. The problem is they don't know where to look.</p>
+  <p>Your idea is already inside your life. These four exercises help you find it. Don't overthink any of them. Write the first things that come to mind. Quantity over quality. You're not committing to anything yet. You're just digging.</p>
+
+  <!-- EXERCISE 1 -->
+  <div class="exercise-wrap">
+    <div class="exercise-header">
+      <span class="exercise-num">Exercise 1 of 4</span>
+      <span class="exercise-title">What Do You Know That Others Don't?</span>
+    </div>
+
+    <p>You have knowledge, experience, and skills that feel completely normal to you but would genuinely help someone else. The fact that something feels obvious to you doesn't mean it's obvious to everyone.</p>
+
+    <div class="question-group">
+      <div class="question-group-label">Your work and career</div>
+      <ul class="q-list">
+        <li>What do you do for work, or what have you done in the past?</li>
+        <li>What part of your job do colleagues come to you for specifically?</li>
+        <li>What have you figured out at work that took years to learn but could save someone else months?</li>
+        <li>What would a new person in your field desperately need to know in their first 90 days?</li>
+      </ul>
+    </div>
+
+    <div class="question-group">
+      <div class="question-group-label">Your skills</div>
+      <ul class="q-list">
+        <li>What can you do that most people in your social circle cannot?</li>
+        <li>What have you taught yourself in the last 3 years?</li>
+        <li>What software, tools, or systems do you know well?</li>
+        <li>What do people compliment you on that you brush off because it feels easy to you?</li>
+        <li>What comes naturally to you? (Trust yourself.)</li>
+      </ul>
+    </div>
+
+    <div class="question-group">
+      <div class="question-group-label">Your life experience</div>
+      <ul class="q-list">
+        <li>What have you been through that was hard but that you came out the other side of?</li>
+        <li>What transition have you navigated that others are currently stuck in?</li>
+        <li>What mistakes have you made that you could help someone else avoid?</li>
+      </ul>
+    </div>
+
+    <div class="example-box">
+      <span class="example-box-label">What this looks like filled in</span>
+      <p>Work: Project manager for 8 years. People always ask me how I stay organized when everything is on fire. Took me 3 years to figure out how to run a meeting that doesn't waste everyone's time.</p>
+      <p>Skills: Good at explaining complicated things simply. Learned Notion completely on my own. People say I give the clearest instructions they've ever followed.</p>
+      <p>Life experience: Went through a career change at 35 with no savings and figured it out. Could have used a roadmap for that.</p>
+    </div>
+
+    <div class="answer-area">
+      <span class="answer-label">Your answers — write everything, don't filter</span>
+      <textarea placeholder="Work: &#10;Skills: &#10;Life experience: &#10;&#10;Five words per answer is fine. Nothing is too small."></textarea>
+    </div>
+  </div>
+
+  <!-- EXERCISE 2 -->
+  <div class="exercise-wrap">
+    <div class="exercise-header">
+      <span class="exercise-num">Exercise 2 of 4</span>
+      <span class="exercise-title">What Do People Ask You For?</span>
+    </div>
+
+    <p>This one is simple and often gives the clearest answer fastest. Think back over the last 12 months.</p>
+
+    <ul class="q-list">
+      <li>What have friends, family, or colleagues asked for your help with?</li>
+      <li>What do people message you about when they need advice?</li>
+      <li>What topic do you find yourself explaining repeatedly in conversations?</li>
+      <li>Has anyone ever said "you should teach this" or "you should charge for this"?</li>
+      <li>What do people tag you in or send you because they know it's your thing?</li>
+    </ul>
+
+    <div class="example-box">
+      <span class="example-box-label">Example</span>
+      <p>Three different friends asked me how I meal prep without spending all Sunday in the kitchen. My sister asked me twice how to negotiate salary. My coworker asked me to show her how I use Notion. Any one of those is a product.</p>
+    </div>
+
+    <div class="answer-area">
+      <span class="answer-label">Your answers — what do people come to you for?</span>
+      <textarea placeholder="If the same answer keeps showing up across multiple questions, that's not a coincidence. That's a signal."></textarea>
+    </div>
+  </div>
+
+  <!-- EXERCISE 3 -->
+  <div class="exercise-wrap">
+    <div class="exercise-header">
+      <span class="exercise-num">Exercise 3 of 4</span>
+      <span class="exercise-title">What Problems Have You Personally Solved?</span>
+    </div>
+
+    <p>People pay for solutions to problems they're currently stuck in. If you've solved a problem, you have a potential product. Go through each area below and write down anything you've figured out.</p>
+
+    <ul class="q-list" style="margin-bottom: 16px;">
+      <li><strong>Money and finances</strong> — debt, savings habits, extra income, budgeting</li>
+      <li><strong>Health and body</strong> — weight, fitness, sleep, burnout, diet</li>
+      <li><strong>Relationships</strong> — breakups, communication, boundaries</li>
+      <li><strong>Career and work</strong> — promotion, career switch, freelancing, layoff survival</li>
+      <li><strong>Creativity and side projects</strong> — finished projects, instruments, writing, building things</li>
+      <li><strong>Tech and tools</strong> — software, automation, websites, systems</li>
+      <li><strong>Mindset and habits</strong> — bad habits, routines, procrastination, anxiety</li>
+    </ul>
+
+    <div class="example-box">
+      <span class="example-box-label">Example</span>
+      <p>I figured out how to fall asleep without scrolling my phone for an hour first. Sounds small. Millions of people cannot do this and would pay $17 for a simple system that actually works.</p>
+    </div>
+
+    <div class="answer-area">
+      <span class="answer-label">Your answers — nothing is too small</span>
+      <textarea placeholder="Write down every problem you've solved, no matter how obvious it seems to you now."></textarea>
+    </div>
+  </div>
+
+  <!-- EXERCISE 4 -->
+  <div class="exercise-wrap">
+    <div class="exercise-header">
+      <span class="exercise-num">Exercise 4 of 4</span>
+      <span class="exercise-title">The Shortcut Test</span>
+    </div>
+
+    <p>This is the fastest exercise. Three questions. First honest answer only. Do not think about it for more than 60 seconds per question.</p>
+
+    <div class="answer-area" style="margin-top: 20px;">
+      <span class="answer-label">1. What could you teach someone in an afternoon that would genuinely improve their life or work?</span>
+      <textarea style="min-height: 72px;" placeholder="Don't overthink it. First honest answer."></textarea>
+    </div>
+
+    <div class="answer-area">
+      <span class="answer-label">2. What do you know now that you wish someone had just told you 3 years ago?</span>
+      <textarea style="min-height: 72px;" placeholder="Not what sounds smart. What's actually true for you."></textarea>
+    </div>
+
+    <div class="answer-area">
+      <span class="answer-label">3. If a friend said "I need help with X" and you felt immediately confident — what would X be?</span>
+      <textarea style="min-height: 72px;" placeholder="The thing you'd help without hesitation."></textarea>
+    </div>
+
+    <div class="example-box">
+      <span class="example-box-label">What answers like this look like</span>
+      <p>How to write a cold email that gets a response. / That you don't need a website to start freelancing — a Google Doc and Stripe link is enough. / How to get their first photography client without a big portfolio.</p>
+      <p style="color: var(--green); font-style: normal; font-weight: 600; font-size: 13px;">Each of those is a product. Three questions, three ideas, 3 minutes.</p>
+    </div>
+  </div>
+
+  <!-- AI PROMPT -->
+  <div class="prompt-block">
+    <div class="prompt-block-label">The AI Idea Generator — Use This If You're Still Stuck</div>
+    <p>Copy this prompt into ChatGPT or Claude. Fill in the brackets with your actual answers from the exercises above.</p>
+    <pre class="prompt-text">"I'm trying to figure out what kind of digital product or service I could create and sell. Here's everything I know about myself:
+
+My work experience and skills: [paste your answers from Exercise 1]
+
+What people ask me for help with: [paste your answers from Exercise 2]
+
+Problems I have personally solved: [paste your answers from Exercise 3]
+
+Things I could teach or help with quickly: [paste your answers from Exercise 4]
+
+Based on all of this, give me 10 specific product or service ideas I could realistically create and sell online. For each idea tell me who would buy it, what their main problem is, and what format the product could take such as ebook, template, mini course, service, or workshop. Be specific. No vague ideas. No ideas that require me to already be famous or have a huge audience."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <p>Read through everything it gives you. Something will click. When it does, take that idea into Module 1.</p>
+
+  <hr class="divider">
+
+  <!-- SECTION 3: CHECKPOINT -->
+  <div class="section-label">Section 3</div>
+  <h2 class="section-title">Before You Go<br>To Module 1</h2>
+
+  <p>Quick checkpoint. At least one of these three things should be true before you move forward:</p>
+
+  <div class="checkpoint-block">
+    <div class="checkpoint-title">Check Off What's True</div>
+
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text">I have <strong>listed the Start Ugly book</strong> on a selling platform and shared the link somewhere. Even if nothing has sold yet. It is live.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text">I have <strong>at least 3 ideas written down</strong> from the mining exercises above.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text">I have <strong>both.</strong></div>
+    </div>
+
+    <div class="warning-text">If none of these are true — go back and do one of them right now. Module 1 is about picking and defining your idea. You need raw material before that process is useful.</div>
+  </div>
+
+  <p style="color: var(--ink); font-weight: 600;">If you already had your own idea before you opened this kit, skip everything above and go straight to Module 1 now.</p>
+
+  <div class="footer">
+    <div class="footer-logo">Start <span>Ugly</span></div>
+    <div class="footer-sub">The Launch Kit · © 2026 Youvelop · Elias Crespo Molato</div>
+  </div>
+
+</div>
+
+<script>
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function copyPrompt(btn) {
+  const pre = btn.previousElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Prompt', 2000);
+  });
+}
+</script>
+
+</body>
+</html>

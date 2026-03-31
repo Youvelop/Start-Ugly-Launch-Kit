@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2: Build Pack — Start Ugly Launch Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #EDEAE1;
+    --cream-dark: #E2DED4;
+    --cream-darker: #D5D0C5;
+    --ink: #1A1A18;
+    --ink-muted: #4A4A45;
+    --ink-light: #7A7A74;
+    --green: #5C6E2E;
+    --green-light: #8A9E48;
+    --green-bg: #EAF0D8;
+    --green-dot: #6B8030;
+    --red: #b84a2e;
+    --border: rgba(26,26,24,0.15);
+    --border-dark: rgba(26,26,24,0.3);
+  }
+
+  body { background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+
+  .top-bar { background: var(--cream-dark); border-bottom: 1px solid var(--border-dark); text-align: center; padding: 10px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-muted); text-transform: uppercase; }
+
+  .page-wrap { max-width: 760px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream-darker); border: 1px solid var(--border-dark); border-radius: 3px; padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 20px; }
+  .badge-dot { width: 6px; height: 6px; background: var(--green-dot); border-radius: 50%; display: inline-block; }
+
+  .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900; line-height: 0.9; text-transform: uppercase; letter-spacing: -1px; color: var(--ink); margin-bottom: 6px; }
+  .hero-title .green { color: var(--green); }
+  .hero-sub { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); letter-spacing: 0.04em; border-left: 3px solid var(--green); padding-left: 12px; margin-top: 16px; margin-bottom: 12px; }
+  .hero-tagline { font-size: 15px; color: var(--ink-muted); font-style: italic; margin-bottom: 40px; padding-left: 15px; border-left: 3px solid var(--border-dark); }
+
+  hr.divider { border: none; border-top: 1px solid var(--border-dark); margin: 40px 0; }
+
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 800; text-transform: uppercase; line-height: 1; color: var(--ink); margin-bottom: 16px; letter-spacing: -0.5px; }
+
+  p { margin-bottom: 14px; color: var(--ink-muted); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  /* FORMAT PICKER */
+  .format-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .format-card { background: white; border: 2px solid var(--border-dark); border-radius: 3px; padding: 14px 16px; cursor: pointer; transition: all 0.12s; }
+  .format-card:hover { border-color: var(--green); }
+  .format-card.selected { border-color: var(--green); background: var(--green-bg); }
+  .format-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; text-transform: uppercase; color: var(--ink); margin-bottom: 4px; letter-spacing: 0.02em; }
+  .format-card.selected .format-card-title { color: var(--green); }
+  .format-card-desc { font-size: 12px; color: var(--ink-light); line-height: 1.5; margin-bottom: 6px; }
+  .format-card-best { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-light); letter-spacing: 0.04em; }
+  .format-card.selected .format-card-best { color: var(--green); }
+
+  .selected-format-display { background: var(--green-bg); border: 1px solid rgba(92,110,46,0.3); border-left: 4px solid var(--green); border-radius: 3px; padding: 12px 16px; margin: 16px 0; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--green); display: none; }
+  .selected-format-display.visible { display: block; }
+
+  /* MVV BUILDER */
+  .mvv-block { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 24px 28px; margin: 24px 0; }
+  .mvv-block-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .mvv-block-label::before { content: ''; display: inline-block; width: 7px; height: 7px; background: var(--green-dot); border-radius: 50%; }
+
+  .mvv-field { margin-bottom: 18px; }
+  .mvv-field:last-child { margin-bottom: 0; }
+  .mvv-field label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 6px; }
+
+  input[type="text"].field-input { width: 100%; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 11px 14px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  input[type="text"].field-input::placeholder { color: var(--ink-light); font-style: italic; }
+  input[type="text"].field-input:focus { border-color: var(--green); }
+
+  .numbered-list { list-style: none; margin: 0; }
+  .numbered-list li { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+  .numbered-list li .num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); min-width: 18px; font-weight: 500; }
+  .numbered-list li input { flex: 1; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  .numbered-list li input::placeholder { color: var(--ink-light); font-style: italic; }
+  .numbered-list li input:focus { border-color: var(--green); }
+
+  input[type="date"].field-input { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+
+  /* DECISION TREE */
+  .tree-block { margin: 24px 0; }
+  .tree-question { background: var(--ink); color: var(--cream); border-radius: 3px; padding: 14px 18px; margin-bottom: 2px; }
+  .tree-question-text { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
+  .tree-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 16px; }
+  .tree-answer { background: var(--cream-darker); border: 1px solid var(--border-dark); padding: 10px 14px; font-size: 13px; color: var(--ink-muted); border-radius: 3px; }
+  .tree-answer strong { color: var(--ink); display: block; font-size: 11px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  /* PATH CARDS */
+  .path-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 20px 0; }
+  .path-card { border: 1px solid var(--border-dark); border-radius: 3px; overflow: hidden; }
+  .path-card-header { background: var(--cream-darker); padding: 12px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-dark); }
+  .path-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--green); color: white; padding: 3px 8px; border-radius: 2px; }
+  .path-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; color: var(--ink); letter-spacing: 0.02em; }
+  .path-card-body { padding: 14px 18px; background: white; }
+  .path-list { list-style: none; }
+  .path-list li { font-size: 13px; color: var(--ink-muted); padding: 5px 0 5px 14px; position: relative; border-bottom: 1px solid var(--border); }
+  .path-list li:last-child { border-bottom: none; }
+  .path-list li::before { content: '→'; position: absolute; left: 0; color: var(--green); font-size: 12px; }
+  .path-tool { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); padding: 8px 18px; background: var(--green-bg); border-top: 1px solid rgba(92,110,46,0.2); display: block; }
+
+  /* TEMPLATES */
+  .template-block { background: var(--ink); border-radius: 4px; margin: 20px 0; overflow: hidden; }
+  .template-header { padding: 16px 22px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; }
+  .template-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-light); }
+  .template-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--cream); letter-spacing: 0.02em; }
+  .template-body { padding: 18px 22px; }
+  .template-text { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 3px; padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(234,224,196,0.9); line-height: 1.8; white-space: pre-wrap; }
+  .copy-btn { background: var(--green); color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 14px; border-radius: 2px; border: none; cursor: pointer; margin-top: 10px; display: inline-block; }
+  .copy-btn:hover { background: var(--green-light); }
+
+  /* PROMPT BLOCKS */
+  .prompt-block { background: var(--ink); border-radius: 4px; padding: 22px 26px; margin: 20px 0; }
+  .prompt-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-light); margin-bottom: 6px; }
+  .prompt-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--cream); margin-bottom: 12px; letter-spacing: 0.02em; }
+  .prompt-text { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 3px; padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(234,224,196,0.9); line-height: 1.7; white-space: pre-wrap; margin: 0; }
+
+  .answer-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 4px; display: block; margin-top: 16px; }
+  textarea { width: 100%; min-height: 90px; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); resize: vertical; outline: none; transition: border-color 0.15s; }
+  textarea::placeholder { color: var(--ink-light); font-style: italic; }
+  textarea:focus { border-color: var(--green); }
+
+  /* CHECKPOINT */
+  .checkpoint-block { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 24px 28px; margin: 32px 0; }
+  .checkpoint-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--ink); margin-bottom: 16px; letter-spacing: 0.02em; }
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-of-type { border-bottom: none; }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--border-dark); border-radius: 2px; flex-shrink: 0; margin-top: 2px; background: white; cursor: pointer; position: relative; transition: all 0.12s; }
+  .check-box.checked { background: var(--green); border-color: var(--green); }
+  .check-box.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg); }
+  .check-text { font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+  .check-text strong { color: var(--ink); }
+  .warning-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); margin-top: 14px; padding: 12px 14px; background: rgba(184,74,46,0.07); border-left: 3px solid var(--red); border-radius: 0 3px 3px 0; }
+
+  .footer { text-align: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border-dark); }
+  .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; color: var(--ink); }
+  .footer-logo span { color: var(--green); }
+  .footer-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); margin-top: 6px; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">Start Ugly: The Launch Kit &nbsp;—&nbsp; Module 2 of 4 · Build Pack</div>
+
+<div class="page-wrap">
+
+  <div class="badge"><span class="badge-dot"></span> Module 2</div>
+  <h1 class="hero-title">Build<br><span class="green">Pack.</span></h1>
+  <div class="hero-sub">Create your minimum viable product this week.</div>
+  <p class="hero-tagline">You have your idea. You have your one sentence offer. Now you build the actual thing. One outcome only: a real product that exists by the end of this week. Not perfect. Not finished. Real.</p>
+
+  <hr class="divider">
+
+  <!-- FORMAT PICKER -->
+  <div class="section-label">Start Here</div>
+  <h2 class="section-title">What Are You<br>Actually Building?</h2>
+
+  <p>Before you touch any tool or template, pick the format. Most people overcomplicate this. There are really only a handful of formats that work for a first product. Pick the one that fits. If more than one fits, pick the simplest one.</p>
+
+  <div class="format-grid">
+    <div class="format-card" onclick="selectFormat(this, 'PDF Guide')">
+      <div class="format-card-title">PDF Guide</div>
+      <div class="format-card-desc">5–30 pages. Teaches, explains, or walks someone through something. Google Docs exports to PDF for free.</div>
+      <div class="format-card-best">Best for: knowledge, processes, frameworks, how-to, checklists</div>
+    </div>
+    <div class="format-card" onclick="selectFormat(this, 'Notion Template')">
+      <div class="format-card-title">Notion Template</div>
+      <div class="format-card-desc">A pre-built workspace someone duplicates and uses immediately. No heavy writing required.</div>
+      <div class="format-card-best">Best for: systems, planners, trackers, dashboards, workflows</div>
+    </div>
+    <div class="format-card" onclick="selectFormat(this, 'Canva Template')">
+      <div class="format-card-title">Canva Template</div>
+      <div class="format-card-desc">Pre-designed file someone opens, swaps text and colors, and uses or sells. Build once, sell forever.</div>
+      <div class="format-card-best">Best for: social templates, slide decks, lead magnets, brand kits</div>
+    </div>
+    <div class="format-card" onclick="selectFormat(this, 'Swipe File / Prompt Pack')">
+      <div class="format-card-title">Swipe File / Prompt Pack</div>
+      <div class="format-card-desc">A collection of copy, scripts, or prompts someone uses directly. No design needed. A Google Doc works fine.</div>
+      <div class="format-card-best">Best for: email sequences, captions, scripts, AI prompts, DM templates</div>
+    </div>
+    <div class="format-card" onclick="selectFormat(this, 'Mini Email Course')">
+      <div class="format-card-title">Mini Email Course</div>
+      <div class="format-card-desc">5–7 emails that teach one specific thing. Written once, delivered automatically forever.</div>
+      <div class="format-card-best">Best for: education, skill building, step-by-step progression</div>
+    </div>
+  </div>
+
+  <div class="selected-format-display" id="format-display">Format selected: <span id="format-name"></span></div>
+
+  <hr class="divider">
+
+  <!-- PART 1: MVV BUILDER -->
+  <div class="section-label">Part 1 of 4</div>
+  <h2 class="section-title">The MVV Builder</h2>
+
+  <p>MVV = Minimum Viable Version. The smallest real version of your product that someone can actually use and benefit from. Not a placeholder. Not a draft. A real thing with real value.</p>
+  <p>Fill this in completely before you open any tool or start building anything.</p>
+
+  <div class="mvv-block">
+    <div class="mvv-block-label">Fill This In First</div>
+
+    <div class="mvv-field">
+      <label>My product is</label>
+      <input type="text" class="field-input" placeholder="One sentence. What is the actual thing?">
+    </div>
+    <div class="mvv-field">
+      <label>The one specific person it is for</label>
+      <input type="text" class="field-input" placeholder="From your offer formula in Module 1.">
+    </div>
+    <div class="mvv-field">
+      <label>The one specific problem it solves</label>
+      <input type="text" class="field-input" placeholder="Their main frustration or blocker right now.">
+    </div>
+    <div class="mvv-field">
+      <label>The one specific result they get</label>
+      <input type="text" class="field-input" placeholder="What their situation looks like after — not during.">
+    </div>
+    <div class="mvv-field">
+      <label>The format it is in</label>
+      <input type="text" class="field-input" id="mvv-format" placeholder="Select a format above or type it here.">
+    </div>
+
+    <div class="mvv-field">
+      <label>The minimum it needs to include to deliver that result</label>
+      <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 10px; font-style: italic;">Only what is absolutely necessary. If someone cannot get the result without it, it goes here. If they can, it doesn't.</p>
+      <ul class="numbered-list" id="must-have-list"></ul>
+    </div>
+
+    <div class="mvv-field">
+      <label>Things I think I need but actually don't for version one</label>
+      <p style="font-size: 13px; color: var(--ink-light); margin-bottom: 10px; font-style: italic;">Be ruthlessly honest. This list is usually longer than the one above.</p>
+      <ul class="numbered-list" id="dont-need-list"></ul>
+    </div>
+
+    <div class="mvv-field">
+      <label>I can have this built by</label>
+      <input type="date" class="field-input" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 2: DECISION TREE -->
+  <div class="section-label">Part 2 of 4</div>
+  <h2 class="section-title">The "What To<br>Actually Make"<br>Decision Tree</h2>
+
+  <p>Use this if you're still unsure what your product should look like or contain.</p>
+
+  <div class="tree-block">
+    <div class="tree-question"><div class="tree-question-text">Can you solve their problem by giving them information?</div></div>
+    <div class="tree-answers">
+      <div class="tree-answer"><strong>Yes →</strong>PDF guide, swipe file, or prompt pack. See the PDF path below.</div>
+      <div class="tree-answer"><strong>No →</strong>Keep reading the questions below.</div>
+    </div>
+
+    <div class="tree-question"><div class="tree-question-text">Can you solve it by giving them a system or template?</div></div>
+    <div class="tree-answers">
+      <div class="tree-answer"><strong>Yes →</strong>Notion template, Canva template, or worksheet pack. See the template path below.</div>
+      <div class="tree-answer"><strong>No →</strong>Keep reading.</div>
+    </div>
+
+    <div class="tree-question"><div class="tree-question-text">Can you solve it by teaching them something step by step?</div></div>
+    <div class="tree-answers">
+      <div class="tree-answer"><strong>Yes →</strong>Mini email course or written guide with exercises. See the course path below.</div>
+      <div class="tree-answer"><strong>No →</strong>Your problem might be too vague. Go back to Module 1 and tighten your offer.</div>
+    </div>
+  </div>
+
+  <div class="path-grid">
+    <div class="path-card">
+      <div class="path-card-header">
+        <span class="path-tag">Path A</span>
+        <span class="path-card-title">The PDF Path</span>
+      </div>
+      <div class="path-card-body">
+        <ul class="path-list">
+          <li>A clear title that states the result, not the topic</li>
+          <li>An intro that tells them exactly what they'll have by the end</li>
+          <li>3–7 sections, each solving one specific part of the problem</li>
+          <li>At least one actionable exercise or fill-in per section</li>
+          <li>A final section that tells them what to do next</li>
+          <li>8–20 pages total. Do not pad it. Longer is not more valuable.</li>
+        </ul>
+      </div>
+      <span class="path-tool">Tool: Google Docs → Export as PDF</span>
+    </div>
+
+    <div class="path-card">
+      <div class="path-card-header">
+        <span class="path-tag">Path B</span>
+        <span class="path-card-title">The Template Path</span>
+      </div>
+      <div class="path-card-body">
+        <ul class="path-list">
+          <li>A clear instruction page at the top explaining how to use it</li>
+          <li>Pre-filled examples so they see what done looks like</li>
+          <li>Clear labels on every section — nothing should be confusing</li>
+          <li>Empty versions of each section for their own content</li>
+          <li>A "Start Here" note that tells them step one immediately</li>
+        </ul>
+      </div>
+      <span class="path-tool">Tool: Notion for systems · Canva for visual templates</span>
+    </div>
+
+    <div class="path-card">
+      <div class="path-card-header">
+        <span class="path-tag">Path C</span>
+        <span class="path-card-title">The Course Path</span>
+      </div>
+      <div class="path-card-body">
+        <ul class="path-list">
+          <li>A welcome email that sets expectations and previews what's coming</li>
+          <li>One lesson per day, covering exactly one concept or action</li>
+          <li>Each lesson ending with one task they complete before the next</li>
+          <li>A final lesson that celebrates their progress and tells them the next step</li>
+          <li>5–7 emails total. 300–500 words each. Short enough to read in 5 minutes.</li>
+        </ul>
+      </div>
+      <span class="path-tool">Tool: Whatever email tool you already have</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 3: TEMPLATES -->
+  <div class="section-label">Part 3 of 4</div>
+  <h2 class="section-title">Done-For-You<br>Product Templates</h2>
+
+  <p>You don't need to start from scratch. Copy the template that matches your format and fill it in with your content.</p>
+
+  <div class="template-block">
+    <div class="template-header">
+      <div>
+        <div class="template-num">Template 1 of 3</div>
+        <div class="template-title">The PDF Guide Structure</div>
+      </div>
+      <button class="copy-btn" onclick="copyTemplate('tpl1')">Copy</button>
+    </div>
+    <div class="template-body">
+      <pre class="prompt-text" id="tpl1">[YOUR PRODUCT TITLE]
+[Subtitle: exactly what this is and who it's for]
+
+---
+
+WHAT THIS IS
+
+This guide will help you [specific result] in [specific timeframe]. By the time you finish it you will have [specific tangible outcome].
+
+This is for you if: [describe your specific person and their situation in 2–3 sentences]
+
+This is not for you if: [be honest about who this won't help]
+
+---
+
+SECTION 1: [Name of first step or concept]
+
+[Explain the concept in plain language. 150–300 words max.]
+
+Your action for this section: [One specific task they do right now before moving on]
+
+---
+
+SECTION 2: [Name of second step or concept]
+
+[Same structure — concept, then action]
+
+---
+
+[Continue for each section]
+
+---
+
+WHAT TO DO NEXT
+
+You now have [summarize what they've built or learned]. The next step is [one specific action that continues their momentum].
+
+If you want to go further: [optional next step or resource]</pre>
+    </div>
+  </div>
+
+  <div class="template-block">
+    <div class="template-header">
+      <div>
+        <div class="template-num">Template 2 of 3</div>
+        <div class="template-title">The Swipe File Structure</div>
+      </div>
+      <button class="copy-btn" onclick="copyTemplate('tpl2')">Copy</button>
+    </div>
+    <div class="template-body">
+      <pre class="prompt-text" id="tpl2">[YOUR PRODUCT TITLE]: [Number] Ready-To-Use [Templates/Scripts/Prompts] for [Specific Person]
+
+---
+
+HOW TO USE THIS SWIPE FILE
+
+Each [template/script/prompt] in this file is ready to use as-is or adapt for your specific situation. Read through all of them once before you start using them so you know what's available.
+
+---
+
+[TEMPLATE/SCRIPT/PROMPT] 1: [Name or category]
+
+[The actual content]
+
+When to use this: [specific situation]
+
+---
+
+[TEMPLATE/SCRIPT/PROMPT] 2: [Name or category]
+
+[The actual content]
+
+When to use this: [specific situation]
+
+---
+
+[Continue for each one]</pre>
+    </div>
+  </div>
+
+  <div class="template-block">
+    <div class="template-header">
+      <div>
+        <div class="template-num">Template 3 of 3</div>
+        <div class="template-title">The Notion Template Instruction Page</div>
+      </div>
+      <button class="copy-btn" onclick="copyTemplate('tpl3')">Copy</button>
+    </div>
+    <div class="template-body">
+      <pre class="prompt-text" id="tpl3">Welcome. Here's how to use this template.
+
+---
+
+STEP 1
+Duplicate this page into your own Notion workspace by clicking "Duplicate" in the top right menu.
+
+STEP 2
+Read through the entire template once before you start filling anything in. The examples show you what a completed version looks like.
+
+STEP 3
+Start with the section marked "Start Here." Everything else follows from that.
+
+---
+
+What this template does: [One sentence explanation]
+
+Who it's for: [One sentence]
+
+What you'll have when it's complete: [One sentence — the tangible outcome]
+
+---
+
+Questions? [Your contact or support info]</pre>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 4: AI PROMPTS -->
+  <div class="section-label">Part 4 of 4</div>
+  <h2 class="section-title">The 3 AI Prompts</h2>
+
+  <p>Copy and paste these directly into ChatGPT or Claude. Fill in the brackets with your actual information before you hit send.</p>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 1 of 3</div>
+    <div class="prompt-title">Build Your Product Outline</div>
+    <pre class="prompt-text">"I'm creating a [format: PDF guide / swipe file / Notion template / email course] for [your specific person] that helps them [your specific result]. Here is my offer in one sentence: [paste your offer sentence from Module 1].
+
+Give me a complete outline for this product. Include a title, a subtitle, all sections or modules with a one sentence description of each, and the key action or takeaway from each section. The product should be simple enough to build in one week and valuable enough that someone would pay $47 to $97 for it. No filler sections. Only what someone actually needs to get the result."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Paste the outline. Circle the sections that feel right. Cross out anything that feels like filler."></textarea>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 2 of 3</div>
+    <div class="prompt-title">Write Your Product Introduction</div>
+    <pre class="prompt-text">"I'm writing the introduction for a [format] called [your working title]. It's for [your specific person] who struggles with [their specific problem]. By the end of the product they will [specific result].
+
+Write an introduction for this product that does four things: tells them exactly what they will have by the end, makes them feel understood without being dramatic about it, explains why this approach works when others haven't, and tells them exactly how to use the product. Keep it under 300 words. Plain and simple language. No motivational speaker energy."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Paste the intro. Edit it until it sounds like you."></textarea>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 3 of 3</div>
+    <div class="prompt-title">Write One Complete Section</div>
+    <pre class="prompt-text">"I'm writing a section called [section name] for my product [product title]. This section needs to help [your specific person] do [specific action or understand specific concept].
+
+Write this section in full. Include a plain language explanation of the concept, a real example of what this looks like in practice, and one specific action the reader takes at the end of this section before moving on. Keep the explanation under 250 words. The action should be completable in under 20 minutes."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Paste the section. Use this as your starting point — not your final draft."></textarea>
+
+  <hr class="divider">
+
+  <!-- CHECKPOINT -->
+  <div class="section-label">Before You Move to Module 3</div>
+  <h2 class="section-title">Module 2<br>Checkpoint</h2>
+
+  <p>Module 3 is about getting it in front of people. There is nothing to put in front of people if you haven't started building yet.</p>
+
+  <div class="checkpoint-block">
+    <div class="checkpoint-title">Three Things Done</div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>MVV Builder is filled in completely.</strong> You know exactly what you're building, what it contains, and when it will be done.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Format chosen and template structure selected.</strong> You're not figuring out what to make — you're making it.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>You have started building.</strong> Not finished. Started. At minimum your outline and introduction are written.</div>
+    </div>
+    <div class="warning-text">Module 3 is about getting it in front of people. There is nothing to put in front of people if you have not started building yet. Go build something real first.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Start <span>Ugly</span></div>
+    <div class="footer-sub">The Launch Kit · Module 2 · © 2026 Youvelop · Elias Crespo Molato</div>
+  </div>
+
+</div>
+
+<script>
+function selectFormat(card, name) {
+  document.querySelectorAll('.format-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('format-name').textContent = name;
+  document.getElementById('format-display').classList.add('visible');
+  document.getElementById('mvv-format').value = name;
+}
+
+function buildNumberedLists() {
+  const mustHave = document.getElementById('must-have-list');
+  const dontNeed = document.getElementById('dont-need-list');
+  for (let i = 1; i <= 5; i++) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="num">${i}.</span><input type="text" placeholder="Must-have ${i}…">`;
+    mustHave.appendChild(li);
+  }
+  for (let i = 1; i <= 3; i++) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="num">${i}.</span><input type="text" placeholder="Not needed for v1…">`;
+    dontNeed.appendChild(li);
+  }
+}
+
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+function copyPrompt(btn) {
+  const pre = btn.previousElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Prompt', 2000);
+  });
+}
+
+function copyTemplate(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btns = document.querySelectorAll('.copy-btn');
+    btns.forEach(b => {
+      if (b.getAttribute('onclick') === `copyTemplate('${id}')`) {
+        b.textContent = 'Copied!';
+        setTimeout(() => b.textContent = 'Copy', 2000);
+      }
+    });
+  });
+}
+
+buildNumberedLists();
+</script>
+
+</body>
+</html>

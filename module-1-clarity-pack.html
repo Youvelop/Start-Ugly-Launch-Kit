@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1: Clarity Pack — Start Ugly Launch Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #EDEAE1;
+    --cream-dark: #E2DED4;
+    --cream-darker: #D5D0C5;
+    --ink: #1A1A18;
+    --ink-muted: #4A4A45;
+    --ink-light: #7A7A74;
+    --green: #5C6E2E;
+    --green-light: #8A9E48;
+    --green-bg: #EAF0D8;
+    --green-dot: #6B8030;
+    --red: #b84a2e;
+    --border: rgba(26,26,24,0.15);
+    --border-dark: rgba(26,26,24,0.3);
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .top-bar {
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--border-dark);
+    text-align: center;
+    padding: 10px 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .page-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream-darker);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--green-dot);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .hero-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .hero-title .green { color: var(--green); }
+
+  .hero-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+    border-left: 3px solid var(--green);
+    padding-left: 12px;
+    margin-top: 16px;
+    margin-bottom: 12px;
+  }
+
+  .hero-tagline {
+    font-size: 16px;
+    color: var(--ink-muted);
+    font-style: italic;
+    margin-bottom: 40px;
+    padding-left: 15px;
+    border-left: 3px solid var(--border-dark);
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border-dark);
+    margin: 40px 0;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+
+  p { margin-bottom: 14px; color: var(--ink-muted); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  /* QUESTION BLOCKS */
+  .question-block {
+    background: var(--cream-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+  .question-block-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .question-block h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+  }
+  .question-block p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin-bottom: 0;
+  }
+
+  /* IDEA FILTER TABLE */
+  .filter-table-wrap {
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .filter-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .filter-table thead tr {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .filter-table thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .filter-table tbody tr {
+    border-bottom: 1px solid var(--border-dark);
+    background: white;
+  }
+  .filter-table tbody tr:nth-child(even) { background: var(--cream); }
+  .filter-table tbody td {
+    padding: 0;
+    vertical-align: middle;
+  }
+  .filter-table tbody td input[type="text"],
+  .filter-table tbody td input[type="number"] {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .filter-table tbody td input::placeholder { color: var(--ink-light); font-style: italic; }
+  .filter-table tbody td.yn-cell {
+    text-align: center;
+  }
+  .yn-toggle {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    padding: 8px 6px;
+  }
+  .yn-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--border-dark);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink-muted);
+    transition: all 0.12s;
+  }
+  .yn-btn.active-yes { background: var(--green); border-color: var(--green); color: white; }
+  .yn-btn.active-no { background: var(--red); border-color: var(--red); color: white; }
+
+  /* TIEBREAKER + FINAL IDEA */
+  .tiebreaker {
+    background: var(--cream-darker);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .tiebreaker strong { color: var(--ink); font-style: normal; }
+
+  .final-idea-block {
+    background: var(--green-bg);
+    border: 1px solid rgba(92,110,46,0.3);
+    border-left: 4px solid var(--green);
+    border-radius: 3px;
+    padding: 18px 22px;
+    margin: 24px 0;
+  }
+  .final-idea-block .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .final-idea-input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border-dark);
+    border-radius: 2px;
+    padding: 11px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    outline: none;
+    letter-spacing: 0.02em;
+  }
+  .final-idea-input::placeholder { color: var(--ink-light); font-weight: 400; font-size: 18px; }
+  .final-idea-input:focus { border-color: var(--green); }
+
+  /* FORMULA */
+  .formula-block {
+    background: var(--ink);
+    border-radius: 4px;
+    padding: 22px 28px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  .formula-block .formula-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    margin-bottom: 10px;
+  }
+  .formula-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+  .formula-text .green { color: var(--green-light); }
+
+  /* BLANK INPUTS */
+  .blank-section { margin: 28px 0; }
+  .blank-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .blank-section h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .examples-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0 14px;
+  }
+  .example-col {
+    background: var(--cream-darker);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+  }
+  .example-col-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .example-col-label.bad { color: var(--red); }
+  .example-col-label.good { color: var(--green); }
+  .example-col p { font-size: 12px; margin-bottom: 4px; color: var(--ink-muted); }
+
+  input[type="text"].field-input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 11px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"].field-input::placeholder { color: var(--ink-light); font-style: italic; }
+  input[type="text"].field-input:focus { border-color: var(--green); }
+
+  /* SENTENCE BUILDER */
+  .sentence-builder {
+    background: var(--cream-dark);
+    border: 1px solid var(--border-dark);
+    border-left: 4px solid var(--green);
+    border-radius: 3px;
+    padding: 20px 24px;
+    margin: 28px 0;
+  }
+  .sentence-builder .sb-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .sentence-preview {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 10px;
+    min-height: 32px;
+  }
+  .sentence-preview .blank {
+    color: var(--ink-light);
+    font-weight: 400;
+    font-style: italic;
+  }
+  .sentence-preview .filled { color: var(--green); }
+  .sb-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 10px;
+  }
+
+  /* PROMPT BLOCKS */
+  .prompt-block {
+    background: var(--ink);
+    border-radius: 4px;
+    padding: 22px 26px;
+    margin: 20px 0;
+  }
+  .prompt-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    margin-bottom: 6px;
+  }
+  .prompt-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--cream);
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+  .prompt-text {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: rgba(234,224,196,0.9);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+  .copy-btn {
+    margin-top: 10px;
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 2px;
+    border: none;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--green-light); }
+
+  /* TEXTAREA */
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    background: white;
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-top: 6px;
+  }
+  textarea::placeholder { color: var(--ink-light); font-style: italic; }
+  textarea:focus { border-color: var(--green); }
+  .answer-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+    display: block;
+    margin-top: 16px;
+  }
+
+  /* CHECKPOINT */
+  .checkpoint-block {
+    background: var(--cream-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 24px 28px;
+    margin: 32px 0;
+  }
+  .checkpoint-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-item:last-of-type { border-bottom: none; }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border-dark);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.12s;
+  }
+  .check-box.checked { background: var(--green); border-color: var(--green); }
+  .check-box.checked::after {
+    content: '';
+    position: absolute;
+    left: 4px; top: 1px;
+    width: 6px; height: 10px;
+    border: 2px solid white;
+    border-top: none; border-left: none;
+    transform: rotate(45deg);
+  }
+  .check-text { font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+  .check-text strong { color: var(--ink); }
+
+  .warning-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(184,74,46,0.07);
+    border-left: 3px solid var(--red);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-dark);
+  }
+  .footer-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .footer-logo span { color: var(--green); }
+  .footer-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">Start Ugly: The Launch Kit &nbsp;—&nbsp; Module 1 of 4 · Clarity Pack</div>
+
+<div class="page-wrap">
+
+  <div class="badge"><span class="badge-dot"></span> Module 1</div>
+
+  <h1 class="hero-title">Clarity<br><span class="green">Pack.</span></h1>
+  <div class="hero-sub">Know exactly what you're launching before you build anything.</div>
+  <p class="hero-tagline">Most people fail before they start because they're trying to build something they can't even describe. This module fixes that. By the end you'll have one sentence that describes your offer, who it's for, and why they should care.</p>
+
+  <hr class="divider">
+
+  <!-- PART 1: IDEA FILTER -->
+  <div class="section-label">Part 1 of 3</div>
+  <h2 class="section-title">The Idea Filter</h2>
+
+  <p>You probably have more than one idea. That's the problem. Having five ideas and doing nothing is not a creativity problem. It's a decision problem. This filter forces you to pick one and kill the rest for now.</p>
+  <p>Take your top 3 to 5 ideas and run each one through these three questions.</p>
+
+  <div class="question-block">
+    <div class="question-block-num">Question 1</div>
+    <h3>How much do I actually care? (1–10)</h3>
+    <p>Not "is this a good idea." Not "could this make money." Do you actually care about it? Would you work on it at 6am or 10pm when you're exhausted? Would you still care if it took a year to get traction? Be honest. A 6 is a 6. Don't round up.</p>
+  </div>
+
+  <div class="question-block">
+    <div class="question-block-num">Question 2</div>
+    <h3>Can I start with almost no money or resources? (Y/N)</h3>
+    <p>Right now. With what you have. No big budget, no team, no special equipment. Can a version of this exist within the next 7 days? If you need to raise money, hire someone, or buy expensive tools before you can even start — that's a No.</p>
+  </div>
+
+  <div class="question-block">
+    <div class="question-block-num">Question 3</div>
+    <h3>Will I still care about this in 6 months? (Y/N)</h3>
+    <p>This is the filter that kills shiny object ideas. Some ideas feel urgent right now and will feel completely irrelevant by summer. Others have been sitting in the back of your mind for years and refuse to go away. Be honest about which category yours falls into.</p>
+  </div>
+
+  <div class="filter-table-wrap">
+    <table class="filter-table">
+      <thead>
+        <tr>
+          <th style="width: 36%">My Idea</th>
+          <th style="width: 20%">How much do I care? (1–10)</th>
+          <th style="width: 22%">Can I start now?</th>
+          <th style="width: 22%">Still matters in 6 months?</th>
+        </tr>
+      </thead>
+      <tbody id="idea-table-body">
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tiebreaker">
+    <strong>If two ideas tie</strong> — ask yourself this and go with the first honest answer: <br>"If I could only work on one thing for the next 90 days and everything else was completely off the table, which one would I actually choose?"
+  </div>
+
+  <div class="final-idea-block">
+    <div class="label">The idea I am starting is</div>
+    <input type="text" class="final-idea-input" id="chosen-idea" placeholder="Write it in one line. Be specific." oninput="updateSentence()">
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 2: ONE SENTENCE OFFER -->
+  <div class="section-label">Part 2 of 3</div>
+  <h2 class="section-title">The One Sentence<br>Offer Formula</h2>
+
+  <p>Most people describe their offer the way they'd explain it at a family dinner. Vague, full of jargon, no clear outcome. Nobody buys that. This formula fixes it in one sentence.</p>
+
+  <div class="formula-block">
+    <div class="formula-label">The Formula</div>
+    <div class="formula-text">"I help <span class="green">[specific person]</span> do <span class="green">[specific thing]</span><br>so they can <span class="green">[specific result]</span>."</div>
+  </div>
+
+  <!-- BLANK 1 -->
+  <div class="blank-section">
+    <span class="blank-section-label">Blank 1</span>
+    <h4>Who is the specific person?</h4>
+    <p>Not "everyone." Not "people who want to improve their lives." A real person with a real problem. The more specific you are here the better your offer converts. Specificity feels like it shrinks your audience. It actually increases sales because people see themselves immediately.</p>
+    <div class="examples-row">
+      <div class="example-col">
+        <span class="example-col-label bad">Too vague</span>
+        <p>entrepreneurs</p>
+        <p>creatives</p>
+        <p>people who are stuck</p>
+      </div>
+      <div class="example-col">
+        <span class="example-col-label good">Specific enough</span>
+        <p>first-time Etsy sellers</p>
+        <p>freelance designers with no consistent clients</p>
+        <p>new coaches who have never sold anything online</p>
+      </div>
+    </div>
+    <input type="text" class="field-input" id="blank1" placeholder="Your specific person..." oninput="updateSentence()">
+  </div>
+
+  <!-- BLANK 2 -->
+  <div class="blank-section">
+    <span class="blank-section-label">Blank 2</span>
+    <h4>What is the specific thing you help them do?</h4>
+    <p>One action. One outcome. Not a list of things.</p>
+    <div class="examples-row">
+      <div class="example-col">
+        <span class="example-col-label bad">Too vague</span>
+        <p>grow their business and mindset and brand</p>
+      </div>
+      <div class="example-col">
+        <span class="example-col-label good">Specific enough</span>
+        <p>launch their first digital product</p>
+        <p>write and publish their first piece of content</p>
+        <p>set up a simple system to get their first 10 clients</p>
+      </div>
+    </div>
+    <input type="text" class="field-input" id="blank2" placeholder="The specific thing you help them do..." oninput="updateSentence()">
+  </div>
+
+  <!-- BLANK 3 -->
+  <div class="blank-section">
+    <span class="blank-section-label">Blank 3</span>
+    <h4>What is the specific result they get?</h4>
+    <p>What their life or business looks like after. Not during. After.</p>
+    <div class="examples-row">
+      <div class="example-col">
+        <span class="example-col-label bad">Too vague</span>
+        <p>feel more confident</p>
+        <p>grow as a person</p>
+      </div>
+      <div class="example-col">
+        <span class="example-col-label good">Specific enough</span>
+        <p>make their first $500 online</p>
+        <p>have a product live and selling within a week</p>
+        <p>stop depending on one client for all their income</p>
+      </div>
+    </div>
+    <input type="text" class="field-input" id="blank3" placeholder="The specific result they walk away with..." oninput="updateSentence()">
+  </div>
+
+  <!-- LIVE SENTENCE BUILDER -->
+  <div class="sentence-builder">
+    <div class="sb-label">Your Offer — Live Preview</div>
+    <div class="sentence-preview" id="sentence-preview">
+      "I help <span class="blank">___</span> do <span class="blank">___</span> so they can <span class="blank">___</span>."
+    </div>
+    <div class="sb-note">Read it out loud. If a 12-year-old understands it, it's good. If it sounds like a LinkedIn bio, rewrite it.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PART 3: AI PROMPTS -->
+  <div class="section-label">Part 3 of 3</div>
+  <h2 class="section-title">The 3 AI Prompts</h2>
+
+  <p>Copy and paste these directly into ChatGPT or Claude. Fill in the brackets with your actual information before you hit send.</p>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 1 of 3</div>
+    <div class="prompt-title">Clean Up Your Idea</div>
+    <pre class="prompt-text">"I have a business idea but I'm struggling to describe it clearly. Here's my rough idea: [paste your messy description]. Help me turn this into one clear sentence that explains what I offer, who it's for, and what result they get. Keep it simple so everyone understands. No abstract language. No jargon. No BS. Write 3 versions and tell me which one you think is strongest and why."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Paste what the AI gave you. Note which version you think is strongest."></textarea>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 2 of 3</div>
+    <div class="prompt-title">Get Specific About Your Audience</div>
+    <pre class="prompt-text">"I want to sell [your product or service] to [your rough target audience]. Help me get more specific about who exactly this is for. Give me 5 specific descriptions of real people who would buy this. Include what their main problem is, what they've already tried, and why it hasn't worked. Be specific, not generic."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Which of the 5 descriptions sounds most like your actual buyer?"></textarea>
+
+  <div class="prompt-block">
+    <div class="prompt-num">Prompt 3 of 3</div>
+    <div class="prompt-title">Name Your Product</div>
+    <pre class="prompt-text">"I'm creating a product called [working title or no title yet]. It helps [your one sentence offer]. Give me 10 potential product names. Some should be simple and descriptive. Some should be more creative or intriguing. No cheesy names. No names that sound like self-help books from 2012. Tell me which 3 you think would sell best and why."</pre>
+    <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+  </div>
+
+  <span class="answer-label">Paste your results here</span>
+  <textarea placeholder="Which name are you leaning toward? Write it down even if it's not final."></textarea>
+
+  <hr class="divider">
+
+  <!-- CHECKPOINT -->
+  <div class="section-label">Before You Move to Module 2</div>
+  <h2 class="section-title">Module 1<br>Checkpoint</h2>
+
+  <p>Module 2 is about building the thing. You cannot build something you haven't defined yet. Check these off before you move forward.</p>
+
+  <div class="checkpoint-block">
+    <div class="checkpoint-title">Three Things Done</div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>One idea selected</strong> from the filter. Not the best idea. The one you're actually doing.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>One completed sentence</strong> using the offer formula. Written out. Read aloud. Passes the 12-year-old test.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>At least one AI prompt run</strong> with results you've actually read. Not just copied. Read.</div>
+    </div>
+    <div class="warning-text">If you skipped any of these, go back. Module 2 is about building the thing. You cannot build something you haven't defined yet.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Start <span>Ugly</span></div>
+    <div class="footer-sub">The Launch Kit · Module 1 · © 2026 Youvelop · Elias Crespo Molato</div>
+  </div>
+
+</div>
+
+<script>
+function buildTableRows() {
+  const tbody = document.getElementById('idea-table-body');
+  for (let i = 0; i < 5; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" placeholder="Idea ${i+1}…"></td>
+      <td><input type="number" min="1" max="10" placeholder="1–10" style="width:100%;text-align:center;"></td>
+      <td class="yn-cell">
+        <div class="yn-toggle">
+          <button class="yn-btn" onclick="toggleYN(this,'yes')">Y</button>
+          <button class="yn-btn" onclick="toggleYN(this,'no')">N</button>
+        </div>
+      </td>
+      <td class="yn-cell">
+        <div class="yn-toggle">
+          <button class="yn-btn" onclick="toggleYN(this,'yes')">Y</button>
+          <button class="yn-btn" onclick="toggleYN(this,'no')">N</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function toggleYN(btn, type) {
+  const siblings = btn.parentElement.querySelectorAll('.yn-btn');
+  siblings.forEach(b => { b.classList.remove('active-yes','active-no'); });
+  btn.classList.add(type === 'yes' ? 'active-yes' : 'active-no');
+}
+
+function updateSentence() {
+  const b1 = document.getElementById('blank1').value.trim();
+  const b2 = document.getElementById('blank2').value.trim();
+  const b3 = document.getElementById('blank3').value.trim();
+  const preview = document.getElementById('sentence-preview');
+  const p1 = b1 ? `<span class="filled">${b1}</span>` : `<span class="blank">___</span>`;
+  const p2 = b2 ? `<span class="filled">${b2}</span>` : `<span class="blank">___</span>`;
+  const p3 = b3 ? `<span class="filled">${b3}</span>` : `<span class="blank">___</span>`;
+  preview.innerHTML = `"I help ${p1} do ${p2} so they can ${p3}."`;
+}
+
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+function copyPrompt(btn) {
+  const pre = btn.previousElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Prompt', 2000);
+  });
+}
+
+buildTableRows();
+</script>
+
+</body>
+</html>
