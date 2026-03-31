@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonus: Belief Reset Cards — Start Ugly Launch Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #EDEAE1;
+    --cream-dark: #E2DED4;
+    --cream-darker: #D5D0C5;
+    --ink: #1A1A18;
+    --ink-muted: #4A4A45;
+    --ink-light: #7A7A74;
+    --green: #5C6E2E;
+    --green-light: #8A9E48;
+    --green-bg: #EAF0D8;
+    --green-dot: #6B8030;
+    --red: #b84a2e;
+    --border: rgba(26,26,24,0.15);
+    --border-dark: rgba(26,26,24,0.3);
+  }
+
+  body { background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+
+  .top-bar { background: var(--cream-dark); border-bottom: 1px solid var(--border-dark); text-align: center; padding: 10px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-muted); text-transform: uppercase; }
+
+  .page-wrap { max-width: 760px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream-darker); border: 1px solid var(--border-dark); border-radius: 3px; padding: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 20px; }
+  .badge-dot { width: 6px; height: 6px; background: var(--green-dot); border-radius: 50%; display: inline-block; }
+
+  .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900; line-height: 0.9; text-transform: uppercase; letter-spacing: -1px; color: var(--ink); margin-bottom: 6px; }
+  .hero-title .green { color: var(--green); }
+  .hero-sub { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); letter-spacing: 0.04em; border-left: 3px solid var(--green); padding-left: 12px; margin-top: 16px; margin-bottom: 12px; }
+  .hero-tagline { font-size: 15px; color: var(--ink-muted); font-style: italic; margin-bottom: 40px; padding-left: 15px; border-left: 3px solid var(--border-dark); }
+
+  hr.divider { border: none; border-top: 1px solid var(--border-dark); margin: 40px 0; }
+
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 800; text-transform: uppercase; line-height: 1; color: var(--ink); margin-bottom: 16px; letter-spacing: -0.5px; }
+
+  p { margin-bottom: 14px; color: var(--ink-muted); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  /* PROGRESS DOTS */
+  .progress-row { display: flex; align-items: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+  .prog-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border-dark); background: white; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); cursor: pointer; transition: all 0.15s; font-weight: 500; }
+  .prog-dot.active { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+  .prog-dot.done { background: var(--green); border-color: var(--green); color: white; }
+
+  /* CARD VIEWER */
+  .card-viewer { margin: 24px 0; }
+  .card-face { display: none; }
+  .card-face.active { display: block; }
+
+  /* BELIEF SIDE (Side A) */
+  .side-a { background: var(--ink); border-radius: 4px; overflow: hidden; margin-bottom: 3px; }
+  .side-a-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-light); padding: 14px 22px 6px; }
+  .side-a-belief { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 900; text-transform: uppercase; color: var(--cream); line-height: 1; padding: 0 22px 22px; letter-spacing: -0.5px; }
+
+  /* REFRAME SIDE (Side B) */
+  .side-b { background: white; border: 1px solid var(--border-dark); border-radius: 0 0 4px 4px; padding: 22px; }
+  .side-b-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .side-b-label::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--green-dot); border-radius: 50%; }
+  .side-b-text { font-size: 15px; color: var(--ink-muted); line-height: 1.75; margin-bottom: 20px; }
+  .micro-action { background: var(--green-bg); border: 1px solid rgba(92,110,46,0.25); border-left: 4px solid var(--green); border-radius: 3px; padding: 14px 16px; margin-top: 16px; }
+  .micro-action-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; font-weight: 500; }
+  .micro-action-text { font-size: 14px; color: var(--ink-muted); line-height: 1.65; }
+  .micro-action-input { width: 100%; background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 9px 12px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink); outline: none; margin-top: 10px; transition: border-color 0.15s; }
+  .micro-action-input::placeholder { color: var(--ink-light); font-style: italic; }
+  .micro-action-input:focus { border-color: var(--green); }
+
+  /* CARD NAV */
+  .card-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+  .card-nav-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 16px; border-radius: 2px; border: 1px solid var(--border-dark); background: transparent; cursor: pointer; color: var(--ink-muted); transition: all 0.12s; }
+  .card-nav-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+  .card-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .card-nav-btn.primary { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .card-nav-btn.primary:hover { background: var(--green); border-color: var(--green); }
+  .card-counter { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-light); }
+
+  .done-btn { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .done-check { width: 18px; height: 18px; border: 2px solid var(--border-dark); border-radius: 2px; flex-shrink: 0; background: white; cursor: pointer; position: relative; transition: all 0.12s; }
+  .done-check.checked { background: var(--green); border-color: var(--green); }
+  .done-check.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg); }
+  .done-check-label { font-size: 13px; color: var(--ink-muted); }
+
+  /* HOW TO USE */
+  .how-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .how-card { background: white; border: 1px solid var(--border-dark); border-radius: 3px; padding: 14px 16px; }
+  .how-card-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green); font-weight: 500; margin-bottom: 6px; }
+  .how-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; text-transform: uppercase; color: var(--ink); margin-bottom: 6px; letter-spacing: 0.02em; }
+  .how-card-text { font-size: 13px; color: var(--ink-muted); line-height: 1.5; }
+
+  /* CANVA BRIEF */
+  .canva-brief { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 22px 26px; margin: 24px 0; }
+  .canva-brief-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .canva-brief-label::before { content: ''; display: inline-block; width: 7px; height: 7px; background: var(--green-dot); border-radius: 50%; }
+  .spec-row { display: flex; gap: 8px; margin: 10px 0; }
+  .spec-key { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); min-width: 130px; letter-spacing: 0.04em; padding-top: 1px; }
+  .spec-val { font-size: 14px; color: var(--ink-muted); }
+  .spec-val strong { color: var(--ink); }
+
+  .card-layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .layout-mock { border: 1px solid var(--border-dark); border-radius: 3px; overflow: hidden; }
+  .layout-mock-header { padding: 8px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .layout-mock-header.a { background: var(--ink); color: var(--green-light); }
+  .layout-mock-header.b { background: var(--green-bg); color: var(--green); border-bottom: 1px solid rgba(92,110,46,0.2); }
+  .layout-mock-body { background: white; padding: 12px; font-size: 12px; color: var(--ink-muted); line-height: 1.6; }
+  .layout-mock-body.dark { background: rgba(26,26,24,0.95); color: rgba(234,224,196,0.8); }
+  .layout-zone { border: 1px dashed var(--border-dark); border-radius: 2px; padding: 8px 10px; margin: 6px 0; font-size: 11px; font-style: italic; color: var(--ink-light); text-align: center; }
+  .layout-zone.dark { border-color: rgba(255,255,255,0.15); color: rgba(234,224,196,0.4); }
+
+  /* CHECKPOINT */
+  .checkpoint-block { background: var(--cream-dark); border: 1px solid var(--border-dark); border-radius: 3px; padding: 24px 28px; margin: 32px 0; }
+  .checkpoint-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--ink); margin-bottom: 16px; letter-spacing: 0.02em; }
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-of-type { border-bottom: none; }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--border-dark); border-radius: 2px; flex-shrink: 0; margin-top: 2px; background: white; cursor: pointer; position: relative; transition: all 0.12s; }
+  .check-box.checked { background: var(--green); border-color: var(--green); }
+  .check-box.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg); }
+  .check-text { font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+  .check-text strong { color: var(--ink); }
+
+  /* COMPLETE BLOCK */
+  .complete-block { background: var(--ink); border-radius: 4px; padding: 32px 28px; margin: 32px 0; text-align: center; }
+  .complete-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-light); margin-bottom: 10px; }
+  .complete-title { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 900; text-transform: uppercase; color: var(--cream); line-height: 0.95; letter-spacing: -1px; margin-bottom: 14px; }
+  .complete-title .green { color: var(--green-light); }
+  .complete-text { font-size: 14px; color: rgba(234,224,196,0.7); line-height: 1.7; max-width: 480px; margin: 0 auto; }
+
+  .footer { text-align: center; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border-dark); }
+  .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; color: var(--ink); }
+  .footer-logo span { color: var(--green); }
+  .footer-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-light); margin-top: 6px; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">Start Ugly: The Launch Kit &nbsp;—&nbsp; Bonus · The Belief Reset Cards</div>
+
+<div class="page-wrap">
+
+  <div class="badge"><span class="badge-dot"></span> Bonus</div>
+  <h1 class="hero-title">Belief<br><span class="green">Reset.</span></h1>
+  <div class="hero-sub">10 cards. 10 beliefs. 10 reframes that actually hold up.</div>
+  <p class="hero-tagline">These are not affirmations. Affirmations tell you to feel something different. These tell you to think something different — which is harder and more useful.</p>
+
+  <hr class="divider">
+
+  <!-- CARD VIEWER -->
+  <div class="section-label">The 10 Cards</div>
+  <h2 class="section-title">Read One.<br>Do The Action.</h2>
+
+  <p>Each card has two sides. The belief is what you currently tell yourself. The reframe is the more accurate version of reality. Read both. Do the micro action before moving to the next card.</p>
+
+  <div class="progress-row" id="progress-row"></div>
+
+  <div class="card-viewer" id="card-viewer"></div>
+
+  <div class="card-nav">
+    <button class="card-nav-btn" id="btn-prev" onclick="navCard(-1)" disabled>← Previous</button>
+    <span class="card-counter" id="card-counter">Card 1 of 10</span>
+    <button class="card-nav-btn primary" id="btn-next" onclick="navCard(1)">Next →</button>
+  </div>
+
+  <hr class="divider">
+
+  <!-- HOW TO USE -->
+  <div class="section-label">How To Use These</div>
+  <h2 class="section-title">Three Ways<br>To Use This.</h2>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-card-num">01</div>
+      <div class="how-card-title">As a Buyer</div>
+      <div class="how-card-text">One card per day for 10 days. Do the micro action before moving to the next one. Reading without acting is just entertainment.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">02</div>
+      <div class="how-card-title">As Content</div>
+      <div class="how-card-text">Post one card per day for 10 days on stories or Threads. Add a poll or "which one hits hardest" prompt. Engagement will be higher than almost anything else you post.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">03</div>
+      <div class="how-card-title">As a Reference</div>
+      <div class="how-card-text">The beliefs come back at different stages of building. When they do, find the relevant card and read it again. That's what it's here for.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CANVA BRIEF -->
+  <div class="section-label">Design Instructions</div>
+  <h2 class="section-title">The Canva<br>Brief.</h2>
+
+  <p>When you build these in Canva, keep it simple. Two contrasting treatments — one for Side A (the belief), one for Side B (the reframe). Consistent across all 10 cards so they feel like a set.</p>
+
+  <div class="canva-brief">
+    <div class="canva-brief-label">Specifications</div>
+    <div class="spec-row"><span class="spec-key">Canvas size</span><span class="spec-val"><strong>1080 × 1920px</strong> — Instagram story format</span></div>
+    <div class="spec-row"><span class="spec-key">Cards to build</span><span class="spec-val"><strong>10 cards × 2 sides</strong> = 20 slides total</span></div>
+    <div class="spec-row"><span class="spec-key">Colors</span><span class="spec-val">Your brand colors — one dark treatment for Side A, one light for Side B</span></div>
+    <div class="spec-row"><span class="spec-key">Font</span><span class="spec-val">One display font for belief text, one readable body font for reframe</span></div>
+    <div class="spec-row"><span class="spec-key">Style</span><span class="spec-val">Clean. Minimal. High contrast. No gradients or busy backgrounds.</span></div>
+  </div>
+
+  <div class="card-layout-grid">
+    <div class="layout-mock">
+      <div class="layout-mock-header a">Side A — The Belief</div>
+      <div class="layout-mock-body dark">
+        <div class="layout-zone dark">THE BELIEF — small caps label</div>
+        <div class="layout-zone dark" style="min-height: 80px;">"Belief statement in large bold type centered on card"</div>
+        <div class="layout-zone dark">Card number — bottom</div>
+      </div>
+    </div>
+    <div class="layout-mock">
+      <div class="layout-mock-header b">Side B — The Reframe</div>
+      <div class="layout-mock-body">
+        <div class="layout-zone">THE REFRAME — small caps label</div>
+        <div class="layout-zone" style="min-height: 60px;">Reframe text in readable body size</div>
+        <div class="layout-zone">Dividing line</div>
+        <div class="layout-zone">Micro action in smaller text</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CHECKPOINT -->
+  <div class="section-label">Final Checkpoint</div>
+  <h2 class="section-title">You're Done.<br>Now Go.</h2>
+
+  <div class="checkpoint-block">
+    <div class="checkpoint-title">Last Three Things</div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Read all 10 cards.</strong> Both sides of each one. In order.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Did at least one micro action.</strong> Even one is more than most people do.</div>
+    </div>
+    <div class="check-item">
+      <div class="check-box" onclick="toggleCheck(this)"></div>
+      <div class="check-text"><strong>Built or scheduled the cards in Canva</strong> so they're ready to post during your launch week.</div>
+    </div>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="complete-block">
+    <div class="complete-eyebrow">The Launch Kit · Complete</div>
+    <div class="complete-title">That's<br><span class="green">Everything.</span></div>
+    <div class="complete-text">You have the idea filter, the offer formula, the MVV builder, the 5-day launch calendar, 15 post templates, the DM scripts, the selling page copy, 30 days of content, 10 objection handlers, and 10 belief reframes. Everything you need to launch is already inside. The only thing left is to start.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Start <span>Ugly</span></div>
+    <div class="footer-sub">The Launch Kit · Bonus · © 2026 Youvelop · Elias Crespo Molato</div>
+  </div>
+
+</div>
+
+<script>
+const cards = [
+  {
+    belief: '"I\'m not ready to launch yet."',
+    reframe: 'Nobody launches ready. Ready is not a feeling that arrives before you start. It is a feeling that develops after you have been doing the thing for a while. The only way to get ready is to start before you are.\n\nEvery person whose work you admire launched something that was not ready. The difference between them and you is not readiness. It is that they posted it anyway.',
+    action: 'Name one thing you are waiting to feel ready for. Set a launch date for it right now.',
+    hasInput: true,
+    inputPlaceholder: 'The thing I\'m waiting to feel ready for: _____________ Launch date: _____________'
+  },
+  {
+    belief: '"My idea isn\'t good enough."',
+    reframe: 'You cannot know if your idea is good enough until real people have seen it. Everything before that is just your opinion of your own idea, which is the least reliable data point available.\n\nBad ideas get better when they meet real people. Good ideas get confirmed the same way. The only ideas that stay bad forever are the ones that never leave your notes app.',
+    action: 'Describe your idea in one sentence and send it to one real person today. Their reaction is actual data. Your internal debate is not.',
+    hasInput: false
+  },
+  {
+    belief: '"I don\'t have enough followers to sell anything."',
+    reframe: 'You do not sell to followers. You sell to people. Ten people who trust you will buy something before ten thousand strangers who scroll past it.\n\nEvery person who now has a large audience started with ten followers. Their first sale did not come from their audience size. It came from the quality of their offer and the directness of their ask.',
+    action: 'Write a list of 10 real people in your life right now who would genuinely benefit from what you are building. That is your first audience.',
+    hasInput: false
+  },
+  {
+    belief: '"Someone is already doing this. There\'s no room for me."',
+    reframe: 'There are thousands of fitness coaches, copywriters, photographers, and business consultants. The market did not run out of room for any of them. It made room because each one brought a different perspective, voice, and person they naturally connect with.\n\nPeople do not buy the best version of a thing. They buy from the person they trust and understand. Nobody else has your specific combination of experience, voice, and point of view.',
+    action: 'Name one person already doing what you want to do. Then write down three specific ways your background or perspective is different from theirs.',
+    hasInput: true,
+    inputPlaceholder: 'Person doing it: _____________\nHow I\'m different: 1. _______ 2. _______ 3. _______'
+  },
+  {
+    belief: '"I\'ll start when I have more time."',
+    reframe: 'More time is not coming. Your schedule will not suddenly clear. Life does not create space for your project. You carve it out or it does not happen.\n\nTwenty minutes a day is 122 hours a year. That is enough to write a book, launch a product, or build a body of creative work. You do not need more time. You need to use 20 minutes better than you currently are.',
+    action: 'Find one 20-minute window in the next 24 hours. Put it in your calendar right now with your project name as the event title.',
+    hasInput: true,
+    inputPlaceholder: 'My 20-minute window is: _____________'
+  },
+  {
+    belief: '"What will people think of me if this fails?"',
+    reframe: 'People are thinking about you significantly less than you think they are. This is not harsh. It is liberating.\n\nThe person who sees your first post and thinks it is mediocre will spend approximately four seconds on that thought before moving on with their life. You will spend four months thinking about what they might think. Nobody remembers your bad first post. You will absolutely remember never posting.',
+    action: 'Post something today that you have been holding back because of what someone might think. Notice that the world continues to turn.',
+    hasInput: false
+  },
+  {
+    belief: '"I need to figure out everything before I start."',
+    reframe: 'You will never figure out everything before you start because most of what you need to figure out only becomes clear after you start. The questions you don\'t know to ask yet get answered by doing the thing, not by planning it.\n\nPlanning feels like progress because it is comfortable and risk-free. Building is uncomfortable and exposes you to the possibility of being wrong. That discomfort is not a sign to stop. It is a sign that something real is happening.',
+    action: 'Write down the one thing you are waiting to figure out before you start. Then ask yourself honestly: can I figure this out by starting instead of by thinking about it?',
+    hasInput: true,
+    inputPlaceholder: 'The thing I\'m waiting to figure out: _____________'
+  },
+  {
+    belief: '"I\'ve failed at this before. It probably won\'t work this time either."',
+    reframe: 'Past failure is information, not a verdict. Every attempt taught you something about what does not work, which is exactly the knowledge you need to make the next attempt more likely to succeed.\n\nThe people who eventually build something real are not the ones who succeeded immediately. They are the ones who treated every failure as data and kept going anyway.',
+    action: 'Write down one specific thing you learned from a previous failed attempt. Then write down how that lesson changes what you will do differently this time.',
+    hasInput: true,
+    inputPlaceholder: 'What I learned: _____________\nWhat I\'ll do differently: _____________'
+  },
+  {
+    belief: '"I\'m not an expert. Who am I to teach or sell anything?"',
+    reframe: 'You do not need to be the world\'s leading authority on a topic to help someone with it. You need to be one step ahead of the person you are helping and honest about where you are in the journey.\n\nThe most trusted teachers are often not the most qualified ones. They are the ones who remember what it felt like to not know the thing they now know. Your inexpertness is not a disqualifier. In many cases it is your biggest asset.',
+    action: 'Write down one thing you know now that you did not know two years ago. Find one person who is where you were two years ago. That person is your buyer.',
+    hasInput: false
+  },
+  {
+    belief: '"This has to be perfect before anyone sees it."',
+    reframe: 'Perfect is not a higher standard. It is a hiding strategy. Waiting for perfect is waiting for a version that will never arrive because the definition of perfect keeps moving the closer you get to it.\n\nVersion one does not need to be perfect. It needs to exist. A product with rough edges that is live and selling can be improved. A perfect product that lives in your drafts helps nobody including you.\n\nDone is not the enemy of good. Done is the only thing that can ever become good.',
+    action: 'Identify one thing you have been holding back because it is not perfect yet. Set a deadline to publish it in its current state.',
+    hasInput: true,
+    inputPlaceholder: 'The thing I\'m holding back: _____________\nDeadline to publish it: _____________'
+  }
+];
+
+let currentCard = 0;
+const doneCards = new Array(10).fill(false);
+
+function buildProgressRow() {
+  const row = document.getElementById('progress-row');
+  cards.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot' + (i === 0 ? ' active' : '');
+    dot.textContent = i + 1;
+    dot.id = 'dot-' + i;
+    dot.onclick = () => goToCard(i);
+    row.appendChild(dot);
+  });
+}
+
+function renderCard(index) {
+  const card = cards[index];
+  const viewer = document.getElementById('card-viewer');
+  viewer.innerHTML = `
+    <div class="card-face active">
+      <div class="side-a">
+        <div class="side-a-label">The Belief — Card ${index + 1} of 10</div>
+        <div class="side-a-belief">${card.belief}</div>
+      </div>
+      <div class="side-b">
+        <div class="side-b-label">The Reframe</div>
+        <div class="side-b-text">${card.reframe.replace(/\n\n/g, '</p><p style="margin-top:12px; color:var(--ink-muted);">').replace(/^/, '<p style="color:var(--ink-muted);">').replace(/$/, '</p>')}</div>
+        <div class="micro-action">
+          <div class="micro-action-label">Micro Action</div>
+          <div class="micro-action-text">${card.action}</div>
+          ${card.hasInput ? `<input type="text" class="micro-action-input" placeholder="${card.inputPlaceholder}">` : ''}
+        </div>
+        <div class="done-btn" style="margin-top: 16px;">
+          <div class="done-check ${doneCards[index] ? 'checked' : ''}" onclick="markDone(${index}, this)"></div>
+          <span class="done-check-label">Done — I read this card and did the action</span>
+        </div>
+      </div>
+    </div>
+  `;
+  updateNav(index);
+}
+
+function updateNav(index) {
+  document.getElementById('card-counter').textContent = `Card ${index + 1} of 10`;
+  document.getElementById('btn-prev').disabled = index === 0;
+  document.getElementById('btn-next').disabled = index === 9;
+  document.getElementById('btn-next').textContent = index === 9 ? 'All Done' : 'Next →';
+
+  document.querySelectorAll('.prog-dot').forEach((dot, i) => {
+    dot.classList.remove('active');
+    if (doneCards[i]) dot.classList.add('done');
+    else dot.classList.remove('done');
+  });
+  const activeDot = document.getElementById('dot-' + index);
+  if (activeDot && !doneCards[index]) activeDot.classList.add('active');
+}
+
+function navCard(dir) {
+  const next = currentCard + dir;
+  if (next < 0 || next > 9) return;
+  goToCard(next);
+}
+
+function goToCard(index) {
+  currentCard = index;
+  renderCard(index);
+  document.getElementById('card-viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function markDone(index, el) {
+  el.classList.toggle('checked');
+  doneCards[index] = el.classList.contains('checked');
+  updateNav(index);
+}
+
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+buildProgressRow();
+renderCard(0);
+</script>
+
+</body>
+</html>
