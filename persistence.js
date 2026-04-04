@@ -16,7 +16,7 @@
 
 (function () {
   // ── CONFIG ── edit these two lines per template ──────────────────────────
-  const WORKER_URL  = "https://your-worker.your-subdomain.workers.dev";
+  const WORKER_URL = "https://billowing-darkness-c2d6.elias-account.workers.dev";
   const TEMPLATE_ID = "module-1"; // change per template file
   // ─────────────────────────────────────────────────────────────────────────
 
