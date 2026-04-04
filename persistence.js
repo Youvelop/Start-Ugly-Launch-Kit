@@ -1,151 +1,83 @@
 /**
- * Youvelop – Template Persistence Snippet
- * Drop this <script> block at the bottom of every HTML template, just before </body>.
- *
- * What it does:
- *  - Generates a unique access code for new buyers (stored in localStorage)
- *  - Shows a small persistent UI so buyers can copy/enter their code
- *  - Auto-saves every input, textarea, and select field as the buyer types
- *  - Loads their saved answers on page open (any device, as long as they have their code)
- *
- * Before using:
- *  1. Replace WORKER_URL with your deployed Cloudflare Worker URL
- *  2. Replace TEMPLATE_ID with a short unique id per template
- *     e.g. "pre-module", "module-1", "module-2", "module-3", "module-4", "bonus"
+ * Youvelop – Template Persistence
+ * Handles: text inputs, textareas, date inputs, metric inputs,
+ *          platform buttons, custom check-boxes, ten-people list
  */
 
 (function () {
-  // ── CONFIG ── edit these two lines per template ──────────────────────────
-  const WORKER_URL = "https://billowing-darkness-c2d6.elias-account.workers.dev";
-  const TEMPLATE_ID = "module-1"; // change per template file
-  // ─────────────────────────────────────────────────────────────────────────
+  const WORKER_URL  = (typeof window.WORKER_URL  !== 'undefined') ? window.WORKER_URL  : "";
+  const TEMPLATE_ID = (typeof window.TEMPLATE_ID !== 'undefined') ? window.TEMPLATE_ID : "unknown";
 
-  const LS_KEY      = "youvelop_access_code";
-  const SAVE_DELAY  = 1200; // ms debounce before saving
-  let   saveTimer   = null;
+  const LS_KEY     = "youvelop_access_code";
+  const SAVE_DELAY = 1500;
+  let   saveTimer  = null;
   let   currentCode = null;
+  let   booted     = false;
 
-  // ── 1. Inject the access code UI ─────────────────────────────────────────
+  // ── UI injection ──────────────────────────────────────────────────────────
   function injectUI() {
     const style = document.createElement("style");
     style.textContent = `
       #ylv-bar {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        background: #1a1a1a;
-        color: #fff;
-        font-family: 'IBM Plex Mono', monospace, sans-serif;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 18px;
-        z-index: 9999;
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: #1a1a1a; color: #fff;
+        font-family: 'IBM Plex Mono', monospace, sans-serif; font-size: 12px;
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 18px; z-index: 9999;
         border-top: 2px solid #4a5c2f;
-        box-shadow: 0 -2px 16px rgba(0,0,0,0.4);
-        flex-wrap: wrap;
+        box-shadow: 0 -2px 16px rgba(0,0,0,0.4); flex-wrap: wrap;
       }
       #ylv-bar .ylv-label { color: #888; white-space: nowrap; }
-      #ylv-bar .ylv-code  {
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-radius: 4px;
-        padding: 4px 10px;
-        letter-spacing: 0.12em;
-        font-weight: 600;
-        color: #c8d87a;
-        cursor: pointer;
-        user-select: all;
-        white-space: nowrap;
+      #ylv-bar .ylv-code {
+        background: #2a2a2a; border: 1px solid #444; border-radius: 4px;
+        padding: 4px 10px; letter-spacing: 0.12em; font-weight: 600;
+        color: #c8d87a; cursor: pointer; user-select: all; white-space: nowrap;
       }
       #ylv-bar .ylv-code:hover { border-color: #c8d87a; }
       #ylv-bar .ylv-btn {
-        background: none;
-        border: 1px solid #555;
-        border-radius: 4px;
-        color: #aaa;
-        padding: 4px 10px;
-        font-size: 11px;
-        font-family: inherit;
-        cursor: pointer;
-        white-space: nowrap;
+        background: none; border: 1px solid #555; border-radius: 4px;
+        color: #aaa; padding: 4px 10px; font-size: 11px;
+        font-family: inherit; cursor: pointer; white-space: nowrap;
       }
       #ylv-bar .ylv-btn:hover { border-color: #aaa; color: #fff; }
       #ylv-bar .ylv-status {
-        color: #6a8a3a;
-        font-size: 11px;
-        margin-left: auto;
-        white-space: nowrap;
-        transition: opacity 0.4s;
+        color: #6a8a3a; font-size: 11px; margin-left: auto;
+        white-space: nowrap; transition: opacity 0.4s;
       }
       #ylv-modal-overlay {
-        display: none;
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.7);
-        z-index: 10000;
-        align-items: center;
-        justify-content: center;
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.7); z-index: 10000;
+        align-items: center; justify-content: center;
       }
       #ylv-modal-overlay.open { display: flex; }
       #ylv-modal {
-        background: #1a1a1a;
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 28px 32px;
-        max-width: 380px;
-        width: 90%;
-        font-family: 'IBM Plex Mono', monospace, sans-serif;
-        color: #fff;
+        background: #1a1a1a; border: 1px solid #444; border-radius: 8px;
+        padding: 28px 32px; max-width: 380px; width: 90%;
+        font-family: 'IBM Plex Mono', monospace, sans-serif; color: #fff;
       }
-      #ylv-modal h3 {
-        margin: 0 0 8px;
-        font-size: 14px;
-        color: #c8d87a;
-        letter-spacing: 0.08em;
-      }
-      #ylv-modal p {
-        margin: 0 0 16px;
-        font-size: 12px;
-        color: #888;
-        line-height: 1.6;
-      }
+      #ylv-modal h3 { margin: 0 0 8px; font-size: 14px; color: #c8d87a; letter-spacing: 0.08em; }
+      #ylv-modal p  { margin: 0 0 16px; font-size: 12px; color: #888; line-height: 1.6; }
       #ylv-modal input {
-        width: 100%;
-        box-sizing: border-box;
-        background: #2a2a2a;
-        border: 1px solid #555;
-        border-radius: 4px;
-        color: #fff;
-        font-family: inherit;
-        font-size: 14px;
-        letter-spacing: 0.12em;
-        padding: 10px 12px;
-        margin-bottom: 12px;
-        text-transform: uppercase;
+        width: 100%; box-sizing: border-box; background: #2a2a2a;
+        border: 1px solid #555; border-radius: 4px; color: #fff;
+        font-family: inherit; font-size: 14px; letter-spacing: 0.12em;
+        padding: 10px 12px; margin-bottom: 12px; text-transform: uppercase;
       }
       #ylv-modal input:focus { outline: none; border-color: #c8d87a; }
       #ylv-modal .ylv-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
       #ylv-modal .ylv-modal-actions button {
-        font-family: inherit;
-        font-size: 12px;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        border: 1px solid #555;
-        background: none;
-        color: #aaa;
+        font-family: inherit; font-size: 12px; padding: 8px 16px;
+        border-radius: 4px; cursor: pointer; border: 1px solid #555;
+        background: none; color: #aaa;
       }
       #ylv-modal .ylv-modal-actions button.primary {
-        background: #4a5c2f;
-        border-color: #4a5c2f;
-        color: #fff;
+        background: #4a5c2f; border-color: #4a5c2f; color: #fff;
       }
       #ylv-modal .ylv-modal-actions button:hover { opacity: 0.85; }
       #ylv-modal .ylv-error { color: #e07070; font-size: 11px; margin-top: -8px; margin-bottom: 10px; display: none; }
     `;
     document.head.appendChild(style);
 
-    // Bar
     const bar = document.createElement("div");
     bar.id = "ylv-bar";
     bar.innerHTML = `
@@ -156,7 +88,6 @@
     `;
     document.body.appendChild(bar);
 
-    // Modal
     const modal = document.createElement("div");
     modal.id = "ylv-modal-overlay";
     modal.innerHTML = `
@@ -173,81 +104,63 @@
     `;
     document.body.appendChild(modal);
 
-    // Events
     document.getElementById("ylv-code-display").addEventListener("click", copyCode);
     document.getElementById("ylv-switch-btn").addEventListener("click", openModal);
     document.getElementById("ylv-modal-cancel").addEventListener("click", closeModal);
     document.getElementById("ylv-modal-load").addEventListener("click", handleModalLoad);
-    document.getElementById("ylv-code-input").addEventListener("keydown", e => {
-      if (e.key === "Enter") handleModalLoad();
-    });
+    document.getElementById("ylv-code-input").addEventListener("keydown", e => { if (e.key === "Enter") handleModalLoad(); });
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
   }
 
-  // ── 2. Access code logic ──────────────────────────────────────────────────
+  // ── Access code ───────────────────────────────────────────────────────────
   function generateCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    const rand = (n) => Array.from({length: n}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    const rand = n => Array.from({length: n}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
     return `UGLY-${rand(4)}-${rand(2)}`;
   }
-
   function getOrCreateCode() {
     let code = localStorage.getItem(LS_KEY);
-    if (!code) {
-      code = generateCode();
-      localStorage.setItem(LS_KEY, code);
-    }
+    if (!code) { code = generateCode(); localStorage.setItem(LS_KEY, code); }
     return code;
   }
-
   function setCode(code) {
     localStorage.setItem(LS_KEY, code);
     currentCode = code;
     document.getElementById("ylv-code-display").textContent = code;
   }
-
   function copyCode() {
-    navigator.clipboard.writeText(currentCode).then(() => {
-      setStatus("Copied!", 2000);
-    });
+    navigator.clipboard.writeText(currentCode).then(() => setStatus("Copied!", 2000));
   }
 
-  // ── 3. Modal ──────────────────────────────────────────────────────────────
+  // ── Modal ─────────────────────────────────────────────────────────────────
   function openModal() {
     document.getElementById("ylv-modal-overlay").classList.add("open");
     document.getElementById("ylv-code-input").value = "";
     document.getElementById("ylv-modal-error").style.display = "none";
     setTimeout(() => document.getElementById("ylv-code-input").focus(), 50);
   }
-
-  function closeModal() {
-    document.getElementById("ylv-modal-overlay").classList.remove("open");
-  }
-
+  function closeModal() { document.getElementById("ylv-modal-overlay").classList.remove("open"); }
   async function handleModalLoad() {
     const input = document.getElementById("ylv-code-input").value.trim().toUpperCase();
     if (!input) return;
-
     setStatus("Loading...");
     const result = await loadAnswers(input);
-
     if (!result.found) {
       document.getElementById("ylv-modal-error").style.display = "block";
-      setStatus("");
-      return;
+      setStatus(""); return;
     }
-
     setCode(input);
-    populateFields(result.answers);
+    applyAnswers(result.answers);
     closeModal();
     setStatus("Progress loaded ✓", 3000);
   }
 
-  // ── 4. Save & load ────────────────────────────────────────────────────────
+  // ── Collect all field state ───────────────────────────────────────────────
   function collectAnswers() {
     const answers = {};
-    document.querySelectorAll("input, textarea, select").forEach(el => {
-      if (!el.id && !el.name) return;
+
+    // Standard inputs + textareas (need id or name)
+    document.querySelectorAll("input[id], input[name], textarea[id], textarea[name]").forEach(el => {
       const key = el.id || el.name;
       if (el.type === "checkbox" || el.type === "radio") {
         answers[key] = el.checked;
@@ -255,23 +168,107 @@
         answers[key] = el.value;
       }
     });
+
+    // Date inputs (no id) — index by position
+    document.querySelectorAll("input[type='date']").forEach((el, i) => {
+      answers[`__date_${i}`] = el.value;
+    });
+
+    // Nameless text/number inputs inside metric-field — index by position
+    document.querySelectorAll(".metric-field input").forEach((el, i) => {
+      answers[`__metric_${i}`] = el.value;
+    });
+
+    // Ten-people list inputs
+    document.querySelectorAll("#ten-people input").forEach((el, i) => {
+      answers[`__person_${i}`] = el.value;
+    });
+
+    // Nameless textareas (pcb-body, day5 textareas without id)
+    document.querySelectorAll("textarea:not([id])").forEach((el, i) => {
+      answers[`__textarea_${i}`] = el.value;
+    });
+
+    // Nameless text inputs (field-input without id)
+    document.querySelectorAll("input[type='text'].field-input:not([id])").forEach((el, i) => {
+      answers[`__fieldinput_${i}`] = el.value;
+    });
+
+    // Platform buttons — store selected text per group
+    document.querySelectorAll(".platform-row").forEach((row, i) => {
+      const selected = row.querySelector(".platform-btn.selected");
+      answers[`__platform_${i}`] = selected ? selected.textContent.trim() : "";
+    });
+
+    // Custom check-boxes
+    document.querySelectorAll(".check-box").forEach((el, i) => {
+      answers[`__checkbox_${i}`] = el.classList.contains("checked");
+    });
+
     return answers;
   }
 
-  function populateFields(answers) {
-    Object.entries(answers).forEach(([key, value]) => {
-      const el = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
-      if (!el) return;
+  // ── Apply saved state ─────────────────────────────────────────────────────
+  function applyAnswers(answers) {
+    // Standard inputs + textareas
+    document.querySelectorAll("input[id], input[name], textarea[id], textarea[name]").forEach(el => {
+      const key = el.id || el.name;
+      if (!(key in answers)) return;
       if (el.type === "checkbox" || el.type === "radio") {
-        el.checked = value;
+        el.checked = answers[key];
       } else {
-        el.value = value;
-        // trigger input event so any live-preview logic still fires
+        el.value = answers[key];
         el.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
+
+    // Date inputs
+    document.querySelectorAll("input[type='date']").forEach((el, i) => {
+      const v = answers[`__date_${i}`];
+      if (v !== undefined) el.value = v;
+    });
+
+    // Metric inputs
+    document.querySelectorAll(".metric-field input").forEach((el, i) => {
+      const v = answers[`__metric_${i}`];
+      if (v !== undefined) el.value = v;
+    });
+
+    // Ten-people
+    document.querySelectorAll("#ten-people input").forEach((el, i) => {
+      const v = answers[`__person_${i}`];
+      if (v !== undefined) el.value = v;
+    });
+
+    // Nameless textareas
+    document.querySelectorAll("textarea:not([id])").forEach((el, i) => {
+      const v = answers[`__textarea_${i}`];
+      if (v !== undefined) { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
+    });
+
+    // Nameless field-inputs
+    document.querySelectorAll("input[type='text'].field-input:not([id])").forEach((el, i) => {
+      const v = answers[`__fieldinput_${i}`];
+      if (v !== undefined) el.value = v;
+    });
+
+    // Platform buttons
+    document.querySelectorAll(".platform-row").forEach((row, i) => {
+      const saved = answers[`__platform_${i}`];
+      if (!saved) return;
+      row.querySelectorAll(".platform-btn").forEach(btn => {
+        btn.classList.toggle("selected", btn.textContent.trim() === saved);
+      });
+    });
+
+    // Custom check-boxes
+    document.querySelectorAll(".check-box").forEach((el, i) => {
+      const v = answers[`__checkbox_${i}`];
+      if (v !== undefined) el.classList.toggle("checked", v);
+    });
   }
 
+  // ── Save / load ───────────────────────────────────────────────────────────
   async function saveAnswers() {
     const answers = collectAnswers();
     try {
@@ -299,12 +296,13 @@
   }
 
   function scheduleSave() {
+    if (!booted) return;
     clearTimeout(saveTimer);
     setStatus("Saving...");
     saveTimer = setTimeout(saveAnswers, SAVE_DELAY);
   }
 
-  // ── 5. Status indicator ───────────────────────────────────────────────────
+  // ── Status ────────────────────────────────────────────────────────────────
   let statusTimer = null;
   function setStatus(msg, clearAfter = 0) {
     const el = document.getElementById("ylv-status");
@@ -314,26 +312,36 @@
     if (clearAfter) statusTimer = setTimeout(() => { el.textContent = ""; }, clearAfter);
   }
 
-  // ── 6. Boot ───────────────────────────────────────────────────────────────
+  // ── Boot ──────────────────────────────────────────────────────────────────
   async function init() {
     injectUI();
-
     currentCode = getOrCreateCode();
     document.getElementById("ylv-code-display").textContent = currentCode;
 
-    // Load saved answers for this code
+    // Wait for dynamic content (ten-people list) to render
+    await new Promise(r => setTimeout(r, 300));
+
     setStatus("Loading your progress...");
     const result = await loadAnswers(currentCode);
     if (result.found) {
-      populateFields(result.answers);
+      applyAnswers(result.answers);
       setStatus("Progress loaded ✓", 3000);
     } else {
       setStatus("");
     }
 
-    // Watch all fields
+    booted = true;
+
+    // Watch everything
     document.addEventListener("input",  scheduleSave);
     document.addEventListener("change", scheduleSave);
+
+    // Platform buttons and check-boxes use onclick — patch them to also trigger save
+    // We use a MutationObserver to catch dynamically added elements too
+    const observer = new MutationObserver(() => {
+      if (booted) scheduleSave();
+    });
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ["class"] });
   }
 
   if (document.readyState === "loading") {
